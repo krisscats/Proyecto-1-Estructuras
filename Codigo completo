@@ -1,0 +1,140 @@
+#include <iostream>
+#include <string>
+using namespace std;
+struct Carta{
+    int idCarta;  //IDCarta, nombre, rareza, tipo, costoElixir, dañoBase, vidaBase
+    string nombre;
+    string rareza;
+    string tipo; 
+    int costoElixir;
+    int danoBase;
+    int vidaBase;
+Carta* sig; 
+};
+Carta *listaCartas = nullptr;
+void insercioninicio(int id,string nom, string rar, string tipo, int costE, int danB, int vidB){
+    Carta *aux = listaCartas;
+    while(aux != nullptr){
+    if(aux -> idCarta == id){
+        cout << "ERROR! este ID ya ha sido ingresado para la carta: "<< aux -> nombre << endl;
+        return;    
+}
+aux = aux -> sig;
+}
+
+if(id < 0 || costE < 0 || danB < 0 || vidB < 0){
+    cout << "Datos invalidos: los datos no pueden ser negativos :(" << endl; 
+    return;
+}
+if(nom == "" || rar == "" || tipo == "" ){
+    cout << "Datos invalidos: los campos de texto no pueden estar vacios" << endl;  
+    return;
+}
+//Silos datos son válidos
+    Carta* nueva = new Carta(); 
+    nueva->idCarta = id;
+    nueva->nombre = nom;
+    nueva->rareza = rar;
+    nueva->tipo = tipo;
+    nueva->costoElixir = costE;
+    nueva->danoBase = danB;
+    nueva->vidaBase = vidB;
+
+    //se pone al inicio
+    nueva->sig = listaCartas; //a nueva carta apunta a la que era la primera
+    listaCartas = nueva;        //el inicio ahora es la nueva carta
+
+    cout << "Carta guardada con exito :)" << endl;
+} 
+
+struct NodoCartaMazo {
+    Carta* cartaReal;      
+    NodoCartaMazo* siguiente;
+};
+
+struct Mazo {
+    int idMazo;
+    string nombreMazo;
+    string tipoMazo;
+    int idJugador;
+    NodoCartaMazo* listaCartasMazo = nullptr; 
+    Mazo* siguiente;                          
+};
+
+Mazo* listaGlobalMazos = nullptr; 
+
+int contarCartasEnMazo(Mazo* mazoActual) {
+    int contador = 0;
+    NodoCartaMazo* aux = mazoActual->listaCartasMazo;
+    while (aux != nullptr) {
+        contador++;
+        aux = aux->siguiente;
+    }
+    return contador;
+}
+
+void insertarMazoFinal(int id, string nombre, string tipo, int idJ) {
+    Mazo* check = listaGlobalMazos;
+    while(check != nullptr){
+        if(check->idMazo == id){
+            cout << "Error: ID repetido." << endl;
+            return;
+        }
+        check = check->siguiente;
+    }
+
+    Mazo* nuevoMazo = new Mazo();
+    nuevoMazo->idMazo = id;
+    nuevoMazo->nombreMazo = nombre;
+    nuevoMazo->tipoMazo = tipo;
+    nuevoMazo->idJugador = idJ;
+    nuevoMazo->siguiente = nullptr; 
+
+    if (listaGlobalMazos == nullptr) {
+        listaGlobalMazos = nuevoMazo; 
+    } else {
+        Mazo* auxiliar = listaGlobalMazos;
+        while (auxiliar->siguiente != nullptr) {
+            auxiliar = auxiliar->siguiente;
+        }
+        auxiliar->siguiente = nuevoMazo;
+    }
+}
+
+void agregarCartaASublista(Mazo* mazoDestino, int idCartaBuscar) {
+    if (mazoDestino == nullptr) return;
+
+    if (contarCartasEnMazo(mazoDestino) >= 8) {
+        cout << "Mazo lleno." << endl;
+        return;
+    }
+
+    NodoCartaMazo* auxBusqueda = mazoDestino->listaCartasMazo;
+    while (auxBusqueda != nullptr) {
+        if (auxBusqueda->cartaReal->idCarta == idCartaBuscar) {
+            cout << "Carta repetida." << endl;
+            return;
+        }
+        auxBusqueda = auxBusqueda->siguiente;
+    }
+
+    Carta* encontrada = nullptr;
+    Carta* temp = listaCartas; 
+    while (temp != nullptr) {
+        if (temp->idCarta == idCartaBuscar) {
+            encontrada = temp;
+            break;
+        }
+        temp = temp->sig; 
+    }
+
+    if (encontrada == nullptr) {
+        cout << "No existe la carta." << endl;
+        return;
+    }
+
+    NodoCartaMazo* nuevoNodo = new NodoCartaMazo();
+    nuevoNodo->cartaReal = encontrada;
+    nuevoNodo->siguiente = mazoDestino->listaCartasMazo;
+    mazoDestino->listaCartasMazo = nuevoNodo;
+}
