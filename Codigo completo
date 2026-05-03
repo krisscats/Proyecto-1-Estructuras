@@ -138,3 +138,358 @@ void agregarCartaASublista(Mazo* mazoDestino, int idCartaBuscar) {
     nuevoNodo->siguiente = mazoDestino->listaCartasMazo;
     mazoDestino->listaCartasMazo = nuevoNodo;
 }
+
+
+struct Batallas {
+    int IDBatalla;
+    int IDJugador1;
+    int IDJugador2;
+    int IDMazo1;
+    int IDMazo2;
+    int ganador;
+    int coronasJ1;
+    int coronasJ2;
+    int duracion;
+    int IDArena;
+    int fecha;
+
+
+    Batallas *sig, *ant;
+
+    Batallas (int b, int j1, int j2, int m1, int m2, int g, int c1, int c2, int d, int a, int f){
+
+        IDBatalla = b;
+        IDJugador1 = j1;
+        IDJugador2 = j2;
+        IDMazo1 = m1;
+        IDMazo2 = m2;
+        ganador = g;
+        coronasJ1 = c1;
+        coronasJ2 = c2;
+        duracion = d;
+        IDArena = a;
+        fecha = f;
+
+        sig = NULL;
+        ant = NULL;
+    }
+} *primerBatalla, *colaBatalla;
+
+struct Clanes {
+    int IDClan;
+    string nombreClan;
+    string region;
+    int cantidadMiembros;
+    int puntajeClan;
+
+    Jugadores *listaJugadores;
+
+    Clanes *sig;
+
+    Clanes(int i, string n, string r, int c, int p) {
+        IDClan = i;
+        nombreClan = n;
+        region = r;
+        cantidadMiembros = c;
+        puntajeClan = p;
+
+        sig = nullptr;
+
+    }
+};
+Clanes* inicioClanes = nullptr;
+
+struct Jugadores {
+
+    int IDJugador;
+    string nombreUsuario;
+    int nivelRey;
+    int trofeos;
+    int IDArena;
+    int IDClan;
+
+    Clanes *clanJ;
+    Arenas *arenaJ;
+    Mazos *mazoJ;
+    Batallas *batallasJ;
+
+    Jugadores *sig, *ant;
+
+    Jugadores(int j, string n, int r, int t, int a, int c){
+        IDJugador = j;
+        nombreUsuario = n;
+        nivelRey = r;
+        trofeos = t;
+        IDArena = a;
+        IDClan = c;
+
+        clanJ = nullptr;
+        mazoJ = nullptr;
+        batallasJ = nullptr;
+
+        sig = nullptr;
+        ant = nullptr;
+    }
+} *primerJugador; //Apunta al primer jugador de la lista
+
+////Mantenimiento
+
+void menuCartas() {
+    cout<<"Elija una opcion:"<<endl;
+    cout<<"1.Crear"<<endl;
+    cout<<"2.Leer"<<endl;
+    cout<<"3.Actualizar"<<endl;
+    cout<<"4.Eliminar"<<endl;
+    cout<<"0.Salida"<<endl;
+
+    int opcion;
+    cin>>opcion;
+    while (opcion) {
+        if (opcion == 1) {
+            insertarCarta();
+            return menuCartas();
+        }
+        else if (opcion == 2) {
+            imprimirCartas();
+            return menuCartas();
+        }
+        else if (opcion == 3) {
+            modificarDatos();
+            return menuCartas();
+        }
+        else if (opcion == 4) {
+            eliminarCarta();
+            return menuCartas();
+        }
+    }
+}
+void menuJugadores() {
+    cout<<"Elija una opcion:"<<endl;
+    cout<<"1.Crear"<<endl;
+    cout<<"2.Leer"<<endl;
+    cout<<"3.Actualizar"<<endl;
+    cout<<"4.Eliminar"<<endl;
+    cout<<"0.Salida"<<endl;
+
+    int opcion;
+    cin>>opcion;
+    while (opcion) {
+        if (opcion == 1) {
+            insertarJugador();
+            return menuJugadores();
+        }
+        else if (opcion == 2) {
+            imprimirJugadores();
+            return menuJugadores();
+        }
+        else if (opcion == 3) {
+            modificarDatos();
+            return menuJugadores();
+        }
+        else if (opcion == 4) {
+            eliminarJugador();
+            return menuJugadores();
+        }
+    }
+}
+void menuMazos() {
+    cout<<"Elija una opcion:"<<endl;
+    cout<<"1.Crear"<<endl;
+    cout<<"2.Leer"<<endl;
+    cout<<"3.Actualizar"<<endl;
+    cout<<"4.Eliminar"<<endl;
+    cout<<"0.Salida"<<endl;
+
+    int opcion;
+    cin>>opcion;
+    while (opcion) {
+        if (opcion == 1) {
+            insertarMazo();
+            return menuMazos();
+        }
+        else if (opcion == 2) {
+            imprimirMazos();
+            return menuMazos();
+        }
+        else if (opcion == 3) {
+            modificarDatos();
+            return menuMazos();
+        }
+        else if (opcion == 4) {
+            eliminarMazo();
+            return menuMazos();
+        }
+    }
+}
+void menuBatallas() {
+    cout<<"Elija una opcion:"<<endl;
+    cout<<"1.Crear"<<endl;
+    cout<<"2.Leer"<<endl;
+    cout<<"3.Actualizar"<<endl;
+    cout<<"4.Eliminar"<<endl;
+    cout<<"0.Salida"<<endl;
+
+    int opcion;
+    cin>>opcion;
+    while (opcion) {
+        if (opcion == 1) {
+            insertarBatalla();
+            return menuBatallas();
+        }
+        else if (opcion == 2) {
+            imprimirBatallas();
+            return menuBatallas();
+        }
+        else if (opcion == 3) {
+            modificarDatos();
+            return menuBatallas();
+        }
+        else if (opcion == 4) {
+            eliminarBatalla();
+            return menuBatalla();
+        }
+    }
+}
+void menuClanes() {
+    cout<<"Elija una opcion:"<<endl;
+    cout<<"1.Crear"<<endl;
+    cout<<"2.Leer"<<endl;
+    cout<<"3.Actualizar"<<endl;
+    cout<<"4.Eliminar"<<endl;
+    cout<<"0.Salida"<<endl;
+
+    int opcion;
+    cin>>opcion;
+    while (opcion) {
+        if (opcion == 1) {
+            insertarClan();
+            return menuClanes();
+        }
+        else if (opcion == 2) {
+            imprimirClanes();
+            return menuClanes();
+        }
+        else if (opcion == 3) {
+            modificarDatos();
+            return menuClanes();
+        }
+        else if (opcion == 4) {
+            eliminarClan();
+            return menuClanes();
+        }
+    }
+}
+void menuArenas() {
+    cout<<"Elija una opcion:"<<endl;
+    cout<<"1.Crear"<<endl;
+    cout<<"2.Leer"<<endl;
+    cout<<"3.Actualizar"<<endl;
+    cout<<"4.Eliminar"<<endl;
+    cout<<"0.Salida"<<endl;
+
+    int opcion;
+    cin>>opcion;
+    while (opcion) {
+        if (opcion == 1) {
+            insertar();
+            return menuArenas();
+        }
+        else if (opcion == 2) {
+            imprimir();
+            return menuArenas();
+        }
+        else if (opcion == 3) {
+            modificarDatos();
+            return menuArenas();
+        }
+        else if (opcion == 4) {
+            eliminar();
+            return menuArenas();
+        }
+    }
+}
+
+void mantenimiento() {
+    cout<<"Elija una opcion:"<<endl;
+    cout<<"1.Cartas"<<endl;
+    cout<<"2.Jugadores"<<endl;
+    cout<<"3.Mazos"<<endl;
+    cout<<"4.Clanes"<<endl;
+    cout<<"5.Arenas"<<endl;
+    cout<<"6.Batallas"<<endl;
+    cout<<"0.Salida"<<endl;
+    int opcion;
+    cin>>opcion;
+    while (opcion) {
+        if (opcion == 1) {
+            menuCartas();
+            return mantenimiento();
+        }
+        else if (opcion == 2) {
+            menuJugadores();
+            return mantenimiento();
+        }
+        else if (opcion == 3) {
+            menuMazos();
+            return mantenimiento();
+        }
+        else if (opcion == 4) {
+            menuClanes();
+            return mantenimiento();
+        }
+        else if (opcion == 5) {
+            menuArenas();
+            return mantenimiento();
+        }
+        else if (opcion == 6) {
+            menuBatallas();
+            return mantenimiento();
+        }
+    }
+
+}
+
+
+int printmenu() {
+    cout<<"--------------MENU--------------"<<endl;
+    cout<<"        Elija una opcion        "<<endl;
+    cout<<"1.Mantenimiento"<<endl;
+    cout<<"2.Consultas"<<endl;
+    cout<<"3.Reportes"<<endl;
+    cout<<"4.Simulacion de batallas"<<endl;
+    cout<<"5.Salida"<<endl;
+    int opcion;
+    cin>>opcion;
+    return opcion;
+}
+
+void menu() {
+    int fin = 0;
+    int opcion = printmenu();
+    while (not fin) {
+        if (opcion == 1) {
+            return menu();
+        }
+        else if (opcion == 2) {
+            mantenimiento();
+            return menu();
+        }
+        else if (opcion == 3) {
+            return menu();
+        }
+        else if (opcion == 4) {
+            return menu();
+        }
+        else if (opcion == 5) {
+            cout<<"FIN DEL PROGRAMA"<<endl;
+            fin = 1;
+        }
+
+    }
+
+}
+
+int main() {
+    menu();
+    return 0;
+}
