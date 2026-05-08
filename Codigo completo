@@ -995,6 +995,8 @@ void registrarBatalla(int jugador1, int jugador2) {
             }
         }
         ///////////////////////////////////////////
+        Jugadores *jugadorGanador = buscarJugadorID(ganador);
+        jugadorGanador->nivelRey ++;
         int idBatalla = generarIdNoRepetidoBatalla();
 
         insertarBatallaAlFinal(idBatalla, jugador1,jugador2,maz1->idMazo,maz2->idMazo,ganador,coronasJ1,coronasJ2, duracion, idArena, fecha);
@@ -1004,6 +1006,89 @@ void registrarBatalla(int jugador1, int jugador2) {
     }
 
 }
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Funciones para consultas
+
+Jugadores* jugadorMasTrofeos() {
+    if (!primerJugador) {
+        cout << "No hay jugadores" << endl;
+        return nullptr;
+    }
+
+    Jugadores *temp = primerJugador;
+    Jugadores *maxi = primerJugador;
+
+    while (temp != nullptr) {
+        if (temp->trofeos > maxi->trofeos) {
+            maxi = temp;
+        }
+        temp = temp->sig;
+    }
+
+    return maxi;
+}
+
+Clanes* clanMasMiembros() {
+    if (listaVaciaClan()) {
+        cout << "No hay clanes" << endl;
+        return nullptr;
+    }
+
+    Clanes* temp = inicioClan;
+    Clanes* maxi = inicioClan;
+
+    do {
+        if (temp->cantidadMiembros > maxi->cantidadMiembros) {
+            maxi = temp;
+        }
+        temp = temp->sig;
+    } while (temp != inicioClan);
+
+    return maxi;
+}
+
+Jugadores* jugadorMasBatallas() {
+    if (!primerJugador) {
+        cout << "No hay jugadores" << endl;
+        return nullptr;
+    }
+
+    Jugadores *temp = primerJugador;
+    Jugadores *maxi = primerJugador;
+
+    while (temp != nullptr) {
+        if (temp->nivelRey > maxi->nivelRey) {
+            maxi = temp;
+        }
+        temp = temp->sig;
+    }
+
+    return maxi;
+}
+
+Clanes* jugadoresDelClan(int idClan) {
+    if (listaVaciaClan()) {
+        cout <<"No hay clanes" << endl;
+        return nullptr;
+    }
+
+    Clanes* temp = inicioClan;
+    do {
+        if (temp->idClan == idClan) {
+            return temp->subListaJugadores;
+        }
+        temp = temp->sig;
+    } while (temp != inicioClan);
+
+    cout <<"Clan no encontrado"<< endl;
+    return nullptr;
+}
+
 
 
 int menuConsultas() {
@@ -1024,6 +1109,7 @@ int menuConsultas() {
     cin>>opcion;
     return opcion;
 }
+
 void consultas() {
     int opcion;
     do {
@@ -1031,12 +1117,18 @@ void consultas() {
 
         if (opcion == 1) {
             cout << "Consulta 1: carta más utilizada en todos los mazos" << endl;
+
         }
         else if (opcion == 2) {
             cout << "Consulta 2: jugador con más trofeos" << endl;
+            Jugadores *jugMax = jugadorMasTrofeos();
+            cout<<"Nombre: "<<jugMax->nombreUsuario<< " /ID: "<< jugMax->idJugador<<endl;
+
         }
         else if (opcion == 3) {
             cout << "Consulta 3: clan con más miembros" << endl;
+            Clanes *clanMax = clanMasMiembros();
+            cout<<"Nombre del clan: "<<clanMax->nombreClan<< " /ID: "<< clanMax->idClan<<endl;
         }
         else if (opcion == 4) {
             cout << "Consulta 4: mazo con menor costo promedio de elixir" << endl;
@@ -1046,12 +1138,21 @@ void consultas() {
         }
         else if (opcion == 6) {
             cout << "Consulta 6: jugador con más batallas ganadas" << endl;
+            Jugadores *jugMaxB = jugadorMasBatallas();
+            cout<<"Nombre: "<<jugMaxB->nombreUsuario<< " /ID: "<< jugMaxB->idJugador<<endl;
+
         }
         else if (opcion == 7) {
             cout << "Consulta 7: batallas realizadas en una de las siguientes arenas" << endl;
         }
         else if (opcion == 8) {
             cout << "Consulta 8: jugadores que pertenecen a uno de los siguientes clanes" << endl;
+            imprimirClanes();
+            cout<<"ingrese el ID del clan que le interesa"<<endl;
+            int idClanParaJugadores;
+            cin>>idClanParaJugadores;
+            Jugadores *listaJugadores = jugadoresDelClan(idClanParaJugadores);
+            imprimirJugadores(listaJugadores);
         }
         else if (opcion == 9) {
             cout << "Consulta 9: cartas de rareza legendaria existentes" << endl;
@@ -1068,6 +1169,7 @@ void consultas() {
 
     } while (opcion != 0);
 }
+
 
 //______________________________________________
 // Funciones vacías para evitar errores de compilación (Faltantes en el menú)
