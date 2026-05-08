@@ -1005,6 +1005,70 @@ void registrarBatalla(int jugador1, int jugador2) {
 
 }
 
+
+int menuConsultas() {
+    cout<<"--------------Consultas--------------"<<endl;
+    cout<<"        Elija una opcion        "<<endl;
+    cout<<"1.¿Cual es la carta más utilizada en todos los mazos?"<<endl;
+    cout<<"2.¿Que jugador tiene mas trofeos registrados?"<<endl;
+    cout<<"3.¿Que clan tiene mas miembros?"<<endl;
+    cout<<"4.¿Cual es el mazo con menor costo promedio de elixir?"<<endl;
+    cout<<"5.¿Que arena contiene mas jugadores?"<<endl;
+    cout<<"6.¿Que jugador ha ganado mas batallas?"<<endl;
+    cout<<"7.¿Cuales batallas se realizaron en una de las siguientes arenas?"<<endl;
+    cout<<"8.Cuales jugadores pertenecen a uno de los siguientes clanes?"<<endl;
+    cout<<"9.Que cartas de rareza legendaria existen en el sistema?"<<endl;
+    cout<<"10.¿Que mazos pertenecen a uno de los siguientes jugadores?"<<endl;
+    cout<<"0.Salir"<<endl;
+    int opcion;
+    cin>>opcion;
+    return opcion;
+}
+void consultas() {
+    int opcion;
+    do {
+        opcion = menuConsultas();
+
+        if (opcion == 1) {
+            cout << "Consulta 1: carta más utilizada en todos los mazos" << endl;
+        }
+        else if (opcion == 2) {
+            cout << "Consulta 2: jugador con más trofeos" << endl;
+        }
+        else if (opcion == 3) {
+            cout << "Consulta 3: clan con más miembros" << endl;
+        }
+        else if (opcion == 4) {
+            cout << "Consulta 4: mazo con menor costo promedio de elixir" << endl;
+        }
+        else if (opcion == 5) {
+            cout << "Consulta 5: arena con más jugadores" << endl;
+        }
+        else if (opcion == 6) {
+            cout << "Consulta 6: jugador con más batallas ganadas" << endl;
+        }
+        else if (opcion == 7) {
+            cout << "Consulta 7: batallas realizadas en una de las siguientes arenas" << endl;
+        }
+        else if (opcion == 8) {
+            cout << "Consulta 8: jugadores que pertenecen a uno de los siguientes clanes" << endl;
+        }
+        else if (opcion == 9) {
+            cout << "Consulta 9: cartas de rareza legendaria existentes" << endl;
+        }
+        else if (opcion == 10) {
+            cout << "Consulta 10: mazos que pertenecen a uno de los siguientes jugadores" << endl;
+        }
+        else if (opcion == 0) {
+            cout << "FIN DE CONSULTAS" << endl;
+        }
+        else {
+            cout << "Opción no válida" << endl;
+        }
+
+    } while (opcion != 0);
+}
+
 //______________________________________________
 // Funciones vacías para evitar errores de compilación (Faltantes en el menú)
 void modificarDatos() { cout << "En desarrollo..." << endl; }
