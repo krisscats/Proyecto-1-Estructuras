@@ -1170,6 +1170,74 @@ void consultas() {
     } while (opcion != 0);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Funciones reportes
+void imprimirTodo() {
+
+}
+void reporteJugador(){}
+
+void reporteMazos(){}
+
+void reporteClanes() {
+    if (listaVaciaClan()) {
+        cout << "No hay clanes" << endl;
+        return;
+    }
+
+    Clanes* clan = inicioClan;
+
+    do {
+        imprimirClan(clan);
+        imprimirJugadores(clan->subListaJugadores);
+    } while (clan != inicioClan);
+}
+
+void reporteArenas(){}
+
+void reporteBatallas() {
+    if (primeraBatalla == nullptr) {
+        cout << "No hay batallas registradas" << endl;
+        return;
+    }
+
+    Batallas *temp = primeraBatalla;
+    imprimirBatallas();
+    cout<<"PRIMER JUGADOR"<<endl;
+    imprimirJugador(temp->IDJugador1);
+    cout<<"SEGUNDO JUGADOR"<<endl;
+    imprimirJugador(temp->IDJugador2);
+    imprimirCartas();
+
+
+}
+
+void reporteCartas(){}
+
+void reporteJugadoresNombre() {
+    imprimirJugadores();
+}
+
+void reporteBatallasGanadas() {
+    Jugadores *temp = primerJugador;
+    if (!primerJugador) {
+        cout << "No hay jugadores"<<endl;
+        return;
+    }
+    cout<<"----- BATALLAS GANADAS POR JUGADOR -----"<<endl;
+    while (temp->sig)
+        temp = temp->sig;
+    while (temp) {
+        Batallas *ganadas = buscarJugadorID(temp->idJugador);
+        cout<<"JUGADOR "<<temp->idJugador<<endl;
+        imprimirBatalla(ganadas);
+
+        temp = temp->ant;
+    }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///Reportes
 int menuConsultas() {
