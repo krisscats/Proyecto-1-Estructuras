@@ -1170,6 +1170,77 @@ void consultas() {
     } while (opcion != 0);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///Reportes
+int menuConsultas() {
+    cout << "-------------- REPORTES --------------" << endl;
+    cout << "   Elija una opcion" << endl;
+    cout << "1. Imprimir todas las listas principales" << endl;
+    cout << "2. Reporte detallado de cada jugador (con arena, clan y mazos)" << endl;
+    cout << "3. Lista de mazos con sus 8 cartas" << endl;
+    cout << "4. Reporte de clanes con sus miembros" << endl;
+    cout << "5. Reporte de arenas con los jugadores que pertenecen a cada una" << endl;
+    cout << "6. Reporte de batallas (jugadores, mazos, coronas, ganador)" << endl;
+    cout << "7. Reporte de cartas ordenadas por costo de elixir" << endl;
+    cout << "8. Reporte de jugadores ordenados alfabeticamente" << endl;
+    cout << "9. Reporte de batallas ganadas por cada jugador" << endl;
+    cout << "0. Salir" << endl;
+    int opcion;
+    cin >> opcion;
+    return opcion;
+}
+
+void consultas() {
+    int opcion;
+    do {
+        opcion = menuConsultas();
+
+        if (opcion == 1) {
+            cout << "Reporte 1: imprimir todas las listas principales" << endl;
+
+        }
+        else if (opcion == 2) {
+            cout << "Reporte 2: detalle de cada jugador (arena, clan, mazos)" << endl;
+
+        }
+        else if (opcion == 3) {
+            cout << "Reporte 3: lista de mazos con sus 8 cartas" << endl;
+
+        }
+        else if (opcion == 4) {
+            cout << "Reporte 4: clanes con sus miembros" << endl;
+
+        }
+        else if (opcion == 5) {
+            cout << "Reporte 5: arenas con sus jugadores" << endl;
+
+        }
+        else if (opcion == 6) {
+            cout << "Reporte 6: batallas (jugadores, mazos, coronas, ganador)" << endl;
+
+        }
+        else if (opcion == 7) {
+            cout << "Reporte 7: cartas ordenadas por costo de elixir" << endl;
+
+        }
+        else if (opcion == 8) {
+            cout << "Reporte 8: jugadores ordenados alfabeticamente" << endl;
+
+        }
+        else if (opcion == 9) {
+            cout << "Reporte 9: batallas ganadas por cada jugador" << endl;
+        }
+        else if (opcion == 0) {
+            cout << "FIN DE REPORTES" << endl;
+        }
+        else {
+            cout << "Opción no válida" << endl;
+        }
+        
+    } while (opcion != 0);
+}
+
+
 
 //______________________________________________
 // Funciones vacías para evitar errores de compilación (Faltantes en el menú)
