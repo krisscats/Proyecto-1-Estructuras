@@ -999,6 +999,9 @@ void registrarBatalla(int jugador1, int jugador2) {
 
         insertarBatallaAlFinal(idBatalla, jugador1,jugador2,maz1->idMazo,maz2->idMazo,ganador,coronasJ1,coronasJ2, duracion, idArena, fecha);
     }
+    else {
+        cout<<"Datos no válidos"<<endl;
+    }
 
 }
 
