@@ -467,17 +467,32 @@ struct Jugador {
 
 Jugador *primerJugador = nullptr;
 
-void insertarJugador(int idJugador, string nombreUsuario, int nivelRey, int trofeos, int idArena, int idClan) {
-    Jugador *nuevoJugador = new Jugador(idJugador, nombreUsuario, nivelRey, trofeos, idArena, idClan);
+void insertarJugadorOrdenadoPorNombre(int idJugador, string nombreUsuario, int nivelRey, int trofeos, int idArena, int idClan) {
+    Jugador *nuevo = new Jugador(idJugador, nombreUsuario, nivelRey, trofeos, idArena, idClan);
+    
     if (primerJugador == nullptr) {
-        primerJugador = nuevoJugador;
-    } else {
-        Jugador *temp = primerJugador;
-        while (temp->sig != nullptr)
-            temp = temp->sig;
-        temp->sig = nuevoJugador;
-        nuevoJugador->ant = temp;
+        primerJugador = nuevo;
+        return;
     }
+    
+    if (nombreUsuario < primerJugador->nombreUsuario) {
+        nuevo->sig = primerJugador;
+        primerJugador->ant = nuevo;
+        primerJugador = nuevo;
+        return;
+    }
+
+    Jugador *temp = primerJugador;
+    while (temp->sig != nullptr && temp->sig->nombreUsuario < nombreUsuario) {
+        temp = temp->sig;
+    }
+    
+    nuevo->sig = temp->sig;
+    if (temp->sig != nullptr) {
+        temp->sig->ant = nuevo;
+    }
+    nuevo->ant = temp;
+    temp->sig = nuevo;
 }
 
 Jugador* buscarJugadorID(int IDJugador) {
