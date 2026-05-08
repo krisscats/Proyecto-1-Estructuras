@@ -14,11 +14,7 @@ void mantenimiento();
 void insertarCarta();
 void imprimirCartas();
 void modificarDatos(); 
-void eliminarCarta();
-
-void insertarJugador();
-void imprimirJugadores();
-void eliminarJugador();
+void eliminarCarta();;
 
 void insertarMazo();
 void imprimirMazos();
@@ -27,9 +23,6 @@ void eliminarMazo();
 void insertar(); //para Arena
 void imprimir(); //Para Arena
 void eliminar();  //para Arena
-void insertarBatalla();
-void imprimirBatallas();
-void eliminarBatalla();
 //____________________________________________
 struct Carta{
     int idCarta;  //IDCarta, nombre, rareza, tipo, costoElixir, dañoBase, vidaBase
@@ -195,8 +188,56 @@ void insertarArenaInicio(int id, string nom, int tMin, int tMax) {
     cout << "Arena creada!" << endl;
 }
 
+//____________ ESTRUCTURA DE CLANES ______________
+struct Clanes {
+    int idClan;
+    string nombreClan;
+    string region;
+    int cantidadMiembros;
+    int puntajeClan;
+    Clanes *sig;
 
-//BATALLAS
+    Clanes(int i, string n, string r, int c, int p) {
+        idClan = i;
+        nombreClan = n;
+        region = r;
+        cantidadMiembros = c;
+        puntajeClan = p;
+
+        sig = nullptr;
+
+    }
+};
+Clanes* inicioClan = nullptr;
+
+//____________ ESTRUCTURA DE JUGADORES ______________
+
+struct Jugadores {
+    int idJugador;
+    string nombreUsuario;
+    int nivelRey;
+    int trofeos;
+    int idArena;
+    int idClan;
+
+    Jugadores *sig, *ant;
+
+    Jugadores(int j, string n, int r, int t, int a, int c) {
+        idJugador = j;
+        nombreUsuario = n;
+        nivelRey = r;
+        trofeos = t;
+        idArena = a;
+        idClan = c;
+        sig = nullptr;
+        ant = nullptr;
+    }
+};
+
+Jugadores *primerJugador = nullptr;
+
+
+//____________ ESTRUCTURA DE BATALLAS ______________
 struct Batallas {
     int IDBatalla;
     int IDJugador1;
@@ -206,14 +247,14 @@ struct Batallas {
     int ganador;
     int coronasJ1;
     int coronasJ2;
-    int duracion;
+    float duracion;
     int IDArena;
-    int fecha;
+    string fecha;
 
 
     Batallas *sig, *ant;
 
-    Batallas (int b, int j1, int j2, int m1, int m2, int g, int c1, int c2, int d, int a, int f){
+    Batallas (int b, int j1, int j2, int m1, int m2, int g, int c1, int c2, float d, int a, string f){
 
         IDBatalla = b;
         IDJugador1 = j1;
@@ -231,31 +272,147 @@ struct Batallas {
         ant = NULL;
     }
 };
-Batallas *primerBatalla= nullptr, *colaBatalla = nullptr;
+Batallas *primeraBatalla = nullptr;
 
-//____________ ESTRUCTURA DE CLAN ______________
-struct Clan {
-    int idClan;
-    string nombreClan;
-    string region;
-    int cantidadMiembros;
-    int puntajeClan;
-    Clan *sig;
 
-    Clan(int i, string n, string r, int c, int p) {
-        idClan = i;
-        nombreClan = n;
-        region = r;
-        cantidadMiembros = c;
-        puntajeClan = p;
+void insertarJugadorOrdenadoPorNombre(int idJugador, string nombreUsuario, int nivelRey, int trofeos, int idArena, int idClan) {
+    Jugadores *nuevo = new Jugadores(idJugador, nombreUsuario, nivelRey, trofeos, idArena, idClan);
 
-        sig = nullptr;
-
+    if (primerJugador == nullptr) {
+        primerJugador = nuevo;
+        return;
     }
-};
-Clan* inicioClan = nullptr;
+
+    if (nombreUsuario < primerJugador->nombreUsuario) {
+        nuevo->sig = primerJugador;
+        primerJugador->ant = nuevo;
+        primerJugador = nuevo;
+        return;
+    }
+
+    Jugadores *temp = primerJugador;
+    while (temp->sig != nullptr && temp->sig->nombreUsuario < nombreUsuario) {
+        temp = temp->sig;
+    }
+
+    nuevo->sig = temp->sig;
+    if (temp->sig != nullptr) {
+        temp->sig->ant = nuevo;
+    }
+    nuevo->ant = temp;
+    temp->sig = nuevo;
+}
+Jugadores* buscarJugadorID(int IDJugador) {
+    Jugadores *temp = primerJugador;
+    while (temp) {
+        if (temp->idJugador == IDJugador)
+            return temp;
+        temp = temp->sig;
+    }
+    return nullptr;
+}
+
+void modificarJugadorNombre(int IDJugador, string nombreAnterior, string nuevoNombre) {
+    Jugadores *temp = buscarJugadorID(IDJugador);
+    if (!temp) {
+        cout << "Jugador no existente"<<endl;
+        return;
+    }
+    if (temp->nombreUsuario == nombreAnterior) {
+        temp->nombreUsuario = nuevoNombre;
+        cout << "Nombre modificado"<<endl;
+    } else {
+        cout << "El nombre anterior no coincide"<<endl;
+    }
+}
+
+void modificarJugadorNivelRey(int IDJugador, int nuevoNivel) {
+    Jugadores *temp = buscarJugadorID(IDJugador);
+    if (!temp) {
+        cout << "Jugador no existente"<<endl;
+        return;
+    }
+    temp->nivelRey = nuevoNivel;
+    cout << "Nivel de rey actualizado"<<endl;
+}
+
+void modificarJugadorTrofeos(int IDJugador, int nuevosTrofeos) {
+    Jugadores *temp = buscarJugadorID(IDJugador);
+    if (!temp) {
+        cout << "Jugador no existente"<<endl;
+        return;
+    }
+    temp->trofeos = nuevosTrofeos;
+    cout << "Trofeos actualizados"<<endl;
+}
+
+void modificarJugadorArena(int IDJugador, int nuevaArena) {
+    Jugadores *temp = buscarJugadorID(IDJugador);
+    if (!temp) {
+        cout << "Jugador no existente"<<endl;
+        return;
+    }
+    temp->idArena = nuevaArena;
+    cout << "Arena actualizada"<<endl;
+}
+
+void modificarJugadorClan(int IDJugador, int nuevoClan) {
+    Jugadores *temp = buscarJugadorID(IDJugador);
+    if (!temp) {
+        cout << "Jugador no existente"<<endl;
+        return;
+    }
+    temp->idClan = nuevoClan;
+    cout << "Clan actualizado"<<endl;
+}
+
+void eliminarJugador(int idJugador) {
+    Jugadores *buscado = buscarJugadorID(idJugador);
+    if (!buscado) {
+        cout << "Jugador no encontrado"<<endl;;
+        return;
+    }
+    if (buscado == primerJugador) {
+        primerJugador = buscado->sig;
+        if (primerJugador)
+            primerJugador->ant = nullptr;
+    } else {
+        if (buscado->ant)
+            buscado->ant->sig = buscado->sig;
+        if (buscado->sig)
+            buscado->sig->ant = buscado->ant;
+    }
+    delete buscado;
+    cout << "Jugador eliminado"<<endl;
+}
+
+void imprimirJugadores() {
+    Jugadores *temp = primerJugador;
+    if (!primerJugador) {
+        cout << "No hay jugadores"<<endl;
+        return;
+    }
+    cout<<"----- JUGADORES -----"<<endl;
+    while (temp->sig)
+        temp = temp->sig;
+    while (temp) {
+        cout << "ID: " << temp->idJugador
+             << ", Nombre: " << temp->nombreUsuario
+             << ", Nivel: " << temp->nivelRey
+             << ", Trofeos: " << temp->trofeos
+             << ", Arena: " << temp->idArena
+             << ", Clan: " << temp->idClan << endl;
+        temp = temp->ant;
+    }
+}
 
 
+
+
+void eliminarMazo() { cout << "En desarrollo..." << endl; }
+void insertarArena() { int id, min, max; string nom; cout << "ID: "; cin >> id; cout << "Nombre: "; cin >> nom; cout << "Min: "; cin >> min; cout << "Max: "; cin >> max; insertarArenaInicio(id, nom, min, max); }
+void eliminarArena() { cout << "En desarrollo..." << endl; }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Funciones auxiliares de Clan
 
 //Verifica si la lista está vacía
@@ -264,12 +421,12 @@ bool listaVaciaClan() {
 }
 
 //Devuelve el último nodo de la lista circular
-Clan* obtenerUltimoClan() {
+Clanes* obtenerUltimoClan() {
     if (listaVaciaClan()) {
         return nullptr;
     }
 
-    Clan* temp = inicioClan;
+    Clanes* temp = inicioClan;
 
     while (temp->sig != inicioClan) {
         temp = temp->sig;
@@ -278,12 +435,12 @@ Clan* obtenerUltimoClan() {
     return temp;
 }
 
-Clan* buscarClanPorId(int idClan) {
+Clanes* buscarClanPorId(int idClan) {
     if (listaVaciaClan()) {
         return nullptr;
     }
 
-    Clan* temp = inicioClan;
+    Clanes* temp = inicioClan;
 
     do {
         if (temp->idClan == idClan) {
@@ -299,33 +456,7 @@ bool existeClan(int idClan) {
     return buscarClanPorId(idClan) != nullptr;
 }
 
-bool insertarClanAlFinal(int idClan, string nombreClan, string region, int cantidadMiembros, int puntajeClan) {
-   
-    if (existeClan(idClan)) {
-        cout << "Error: ya existe un clan con el ID " << idClan << "." << endl;
-        return false;
-    }
-
-    Clan* nuevo = new Clan(idClan, nombreClan, region, cantidadMiembros, puntajeClan);
-
-    if (listaVaciaClan()) {
-        inicioClan = nuevo;
-        nuevo->sig = inicioClan;  
-        return true;
-    }
-
-    Clan* temp = inicioClan;
-    while (temp->sig != inicioClan) {
-        temp = temp->sig;
-    }
-
-    temp->sig = nuevo;
-    nuevo->sig = inicioClan;  
-
-    return true;
-}
-
-void imprimirClan(Clan* c) {
+void imprimirClan(Clanes* c) {
     if (c == nullptr) {
         cout << "El clan no existe" << endl;
         return;
@@ -338,6 +469,32 @@ void imprimirClan(Clan* c) {
     cout << "Puntaje: " << c->puntajeClan << " min" << endl;
 }
 
+bool insertarClanAlFinal(int idClan, string nombreClan, string region, int cantidadMiembros, int puntajeClan) {
+
+    if (existeClan(idClan)) {
+        cout << "Error: ya existe un clan con el ID " << idClan << "." << endl;
+        return false;
+    }
+
+    Clanes* nuevo = new Clanes(idClan, nombreClan, region, cantidadMiembros, puntajeClan);
+
+    if (listaVaciaClan()) {
+        inicioClan = nuevo;
+        nuevo->sig = inicioClan;
+        return true;
+    }
+
+    Clanes* temp = inicioClan;
+    while (temp->sig != inicioClan) {
+        temp = temp->sig;
+    }
+
+    temp->sig = nuevo;
+    nuevo->sig = inicioClan;
+
+    return true;
+}
+
 //Mostrar todos los clanes
 void imprimirClanes() {
     if (listaVaciaClan()) {
@@ -345,9 +502,9 @@ void imprimirClanes() {
         return;
     }
 
-    Clan* temp = inicioClan;
+    Clanes* temp = inicioClan;
 
-    cout << "===== CLANES =====" << endl;
+    cout << "----- CLANES -----" << endl;
 
     do {
         imprimirClan(temp);
@@ -357,7 +514,7 @@ void imprimirClanes() {
 }
 
 bool actualizarClanId(int idClan, string nuevoNombreClan, string nuevaRegion, int nuevaCantidadMiembros, int nuevoPuntajeClan) {
-    Clan* encontrado = buscarClanPorId(idClan);
+    Clanes* encontrado = buscarClanPorId(idClan);
 
     if (encontrado == nullptr) {
         return false;
@@ -384,15 +541,15 @@ bool eliminarClan(int idClan) {
     }
 
     if (inicioClan->idClan == idClan) {
-        Clan* ultimo = obtenerUltimoClan();
-        Clan* eliminar = inicioClan;
-        inicioClan = inicioClan->sig; 
+        Clanes* ultimo = obtenerUltimoClan();
+        Clanes* eliminar = inicioClan;
+        inicioClan = inicioClan->sig;
         ultimo->sig = inicioClan;
         delete eliminar;
         return true;
     }
 
-    Clan* actual = inicioClan;
+    Clanes* actual = inicioClan;
 
     while (actual->sig != inicioClan && actual->sig->idClan != idClan) {
         actual = actual->sig;
@@ -402,7 +559,7 @@ bool eliminarClan(int idClan) {
         return false;
     }
 
-    Clan* eliminar = actual->sig;
+    Clanes* eliminar = actual->sig;
     actual->sig = eliminar->sig;
     delete eliminar;
 
@@ -415,10 +572,10 @@ void liberarListaClan() {
         return;
     }
 
-    Clan* actual = inicioClan->sig;
+    Clanes* actual = inicioClan->sig;
 
     while (actual != inicioClan) {
-        Clan* temp = actual;
+        Clanes* temp = actual;
         actual = actual->sig;
         delete temp;
     }
@@ -428,163 +585,130 @@ void liberarListaClan() {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Funciones de Batalla
 
-//____________ ESTRUCTURA DE JUGADOR ______________
-
-struct Jugador {
-    int idJugador;
-    string nombreUsuario;
-    int nivelRey;
-    int trofeos;
-    int idArena;
-    int idClan;
-
-    Jugador *sig, *ant;
-
-    Jugador(int j, string n, int r, int t, int a, int c) {
-        idJugador = j;
-        nombreUsuario = n;
-        nivelRey = r;
-        trofeos = t;
-        idArena = a;
-        idClan = c;
-        sig = nullptr;
-        ant = nullptr;
-    }
-};
-
-Jugador *primerJugador = nullptr;
-
-void insertarJugadorOrdenadoPorNombre(int idJugador, string nombreUsuario, int nivelRey, int trofeos, int idArena, int idClan) {
-    Jugador *nuevo = new Jugador(idJugador, nombreUsuario, nivelRey, trofeos, idArena, idClan);
-    
-    if (primerJugador == nullptr) {
-        primerJugador = nuevo;
-        return;
-    }
-    
-    if (nombreUsuario < primerJugador->nombreUsuario) {
-        nuevo->sig = primerJugador;
-        primerJugador->ant = nuevo;
-        primerJugador = nuevo;
+void insertarBatallaAlFinal(int IDBatalla, int IDJugador1, int IDJugador2,int IDMazo1, int IDMazo2, int ganador,int coronasJ1, int coronasJ2, float duracion,int IDArena, string fecha) {
+    if (buscarBatallaPorID(IDBatalla) != nullptr) {
+        cout << "Ya existe el ID en" << IDBatalla << endl;
         return;
     }
 
-    Jugador *temp = primerJugador;
-    while (temp->sig != nullptr && temp->sig->nombreUsuario < nombreUsuario) {
-        temp = temp->sig;
+    Batallas *nueva = new Batallas(IDBatalla, IDJugador1, IDJugador2,IDMazo1, IDMazo2, ganador, coronasJ1,coronasJ2, duracion, IDArena, fecha);
+
+    if (primeraBatalla == nullptr) {
+        primeraBatalla = nueva;
+        nueva->sig = nueva;
+        nueva->ant = nueva;
+        return;
     }
-    
-    nuevo->sig = temp->sig;
-    if (temp->sig != nullptr) {
-        temp->sig->ant = nuevo;
-    }
-    nuevo->ant = temp;
-    temp->sig = nuevo;
+
+    Batallas *ultimo = primeraBatalla->ant;
+
+    nueva->sig = primeraBatalla;
+    nueva->ant = ultimo;
+    ultimo->sig = nueva;
+    primeraBatalla->ant = nueva;
 }
 
-Jugador* buscarJugadorID(int IDJugador) {
-    Jugador *temp = primerJugador;
-    while (temp) {
-        if (temp->idJugador == IDJugador)
+Batallas* buscarBatallaPorID(int IDBatalla) {
+    if (primeraBatalla == nullptr) {
+        return nullptr;
+    }
+
+    Batallas *temp = primeraBatalla;
+    do {
+        if (temp->IDBatalla == IDBatalla)
             return temp;
         temp = temp->sig;
-    }
+    } while (temp != primeraBatalla);
     return nullptr;
 }
 
-void modificarJugadorNombre(int IDJugador, string nombreAnterior, string nuevoNombre) {
-    Jugador *temp = buscarJugadorID(IDJugador);
-    if (!temp) {
-        cout << "Jugador no existente"<<endl;
+void modificarBatallaCompleta(int IDBatalla, int IDJugador1, int IDJugador2,int IDMazo1, int IDMazo2, int ganador,int coronasJ1, int coronasJ2, float duracion,int IDArena, string fecha) {
+    Batallas *batalla = buscarBatallaPorID(IDBatalla);
+    if (!batalla) {
+        cout << "Batalla no encontrada" << endl;
         return;
     }
-    if (temp->nombreUsuario == nombreAnterior) {
-        temp->nombreUsuario = nuevoNombre;
-        cout << "Nombre modificado"<<endl;
-    } else {
-        cout << "El nombre anterior no coincide"<<endl;
-    }
+    batalla->IDJugador1 = IDJugador1;
+    batalla->IDJugador2 = IDJugador2;
+    batalla->IDMazo1 = IDMazo1;
+    batalla->IDMazo2 = IDMazo2;
+    batalla->ganador = ganador;
+    batalla->coronasJ1 = coronasJ1;
+    batalla->coronasJ2 = coronasJ2;
+    batalla->duracion = duracion;
+    batalla->IDArena = IDArena;
+    batalla->fecha = fecha;
+    cout << "Batalla actualizada correctamente" << endl;
 }
 
-void modificarJugadorNivelRey(int IDJugador, int nuevoNivel) {
-    Jugador *temp = buscarJugadorID(IDJugador);
-    if (!temp) {
-        cout << "Jugador no existente"<<endl;
-        return;
+bool eliminarBatalla(int IDBatalla) {
+    if (primeraBatalla == nullptr) {
+        return false;
     }
-    temp->nivelRey = nuevoNivel;
-    cout << "Nivel de rey actualizado"<<endl;
+
+    Batallas *eliminar = buscarBatallaPorID(IDBatalla);
+    if (!eliminar) return false;
+
+    if (primeraBatalla->sig == primeraBatalla && eliminar == primeraBatalla) {
+        delete primeraBatalla;
+        primeraBatalla = nullptr;
+        return true;
+    }
+
+    eliminar->ant->sig = eliminar->sig;
+    eliminar->sig->ant = eliminar->ant;
+
+    if (eliminar == primeraBatalla) {
+        primeraBatalla = eliminar->sig;
+    }
+
+    delete eliminar;
+    return true;
 }
 
-void modificarJugadorTrofeos(int IDJugador, int nuevosTrofeos) {
-    Jugador *temp = buscarJugadorID(IDJugador);
-    if (!temp) {
-        cout << "Jugador no existente"<<endl;
+void imprimirBatallas() {
+    if (primeraBatalla == nullptr) {
+        cout << "No hay batallas registradas" << endl;
         return;
     }
-    temp->trofeos = nuevosTrofeos;
-    cout << "Trofeos actualizados"<<endl;
-}
 
-void modificarJugadorArena(int IDJugador, int nuevaArena) {
-    Jugador *temp = buscarJugadorID(IDJugador);
-    if (!temp) {
-        cout << "Jugador no existente"<<endl;
-        return;
-    }
-    temp->idArena = nuevaArena;
-    cout << "Arena actualizada"<<endl;
-}
-
-void modificarJugadorClan(int IDJugador, int nuevoClan) {
-    Jugador *temp = buscarJugadorID(IDJugador);
-    if (!temp) {
-        cout << "Jugador no existente"<<endl;
-        return;
-    }
-    temp->idClan = nuevoClan;
-    cout << "Clan actualizado"<<endl;
-}
-
-void eliminarJugador(int idJugador) {
-    Jugador *buscado = buscarJugadorID(idJugador);
-    if (!buscado) {
-        cout << "Jugador no encontrado"<<endl;;
-        return;
-    }
-    if (buscado == primerJugador) {
-        primerJugador = buscado->sig;
-        if (primerJugador)
-            primerJugador->ant = nullptr;
-    } else {
-        if (buscado->ant)
-            buscado->ant->sig = buscado->sig;
-        if (buscado->sig)
-            buscado->sig->ant = buscado->ant;
-    }
-    delete buscado;
-    cout << "Jugador eliminado"<<endl;
-}
-
-void imprimirJugadores() {
-    Jugador *temp = primerJugador;
-    if (!primerJugador) {
-        cout << "No hay jugadores"<<endl;
-        return;
-    }
-    while (temp->sig)
+    Batallas *temp = primeraBatalla;
+    cout << "----- BATALLAS -----" << endl;
+    do {
+        cout << "ID Batalla: " << temp->IDBatalla
+             << ", Jugador1: " << temp->IDJugador1
+             << ", Jugador2: " << temp->IDJugador2
+             << ", Mazo1: " << temp->IDMazo1
+             << ", Mazo2: " << temp->IDMazo2
+             << ", Ganador: " << temp->ganador
+             << ", Coronas J1: " << temp->coronasJ1
+             << ", Coronas J2: " << temp->coronasJ2
+             << ", Duración: " << temp->duracion
+             << ", Arena: " << temp->IDArena
+             << ", Fecha: " << temp->fecha << endl;
+        cout << "-----------------------------" << endl;
         temp = temp->sig;
-    while (temp) {
-        cout << "ID: " << temp->idJugador
-             << ", Nombre: " << temp->nombreUsuario
-             << ", Nivel: " << temp->nivelRey
-             << ", Trofeos: " << temp->trofeos
-             << ", Arena: " << temp->idArena
-             << ", Clan: " << temp->idClan << endl;
-        temp = temp->ant;
-    }
+    } while (temp != primeraBatalla);
 }
+
+void liberarListaBatallas() {
+    if (primeraBatalla == nullptr) return;
+
+    Batallas *actual = primeraBatalla;
+    Batallas *siguiente = nullptr;
+    do {
+        siguiente = actual->sig;
+        delete actual;
+        actual = siguiente;
+    } while (actual != primeraBatalla);
+
+    primeraBatalla = nullptr;
+}
+
+
 //______________________________________________
 // Funciones vacías para evitar errores de compilación (Faltantes en el menú)
 void modificarDatos() { cout << "En desarrollo..." << endl; }
