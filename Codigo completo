@@ -583,6 +583,151 @@ void liberarListaClan() {
     delete inicioClan;
     inicioClan = nullptr;
 }
+///////////////////////////////////////////////////////////
+/// Métodos de subListaJugadores - Pertenece a Clanes
+
+
+Jugadores* insertarJugadorLista(Jugadores *lista, int idJugador, string nombreUsuario, int nivelRey, int trofeos, int idArena, int idClan) {
+    Jugadores *nuevo = new Jugadores(idJugador, nombreUsuario, nivelRey, trofeos, idArena, idClan);
+
+    if (lista == nullptr) {
+        return nuevo;  
+    } 
+    else {
+        Jugadores *temp = lista;
+        while (temp->sig != nullptr) {   
+            temp = temp->sig;
+        }
+        temp->sig = nuevo;
+        nuevo->ant = temp;
+        return lista;   
+    }
+}
+
+Jugadores* buscarJugadorLista(Jugadores *lista, int idJugador) {
+    Jugadores *temp = lista;
+    while (temp != nullptr) {
+        if (temp->idJugador == idJugador) {
+            return temp;
+        }
+        temp = temp->sig;
+    }
+    return nullptr;
+}
+
+Jugadores* modificarJugadorNivelLista(Jugadores *lista, int idJugador, int nuevosTrofeos) {
+    if (lista == nullptr) {
+        cout << "No hay jugadores en la lista" << endl;
+        return lista;
+    }
+    Jugadores *jug = buscarJugadorLista(lista, idJugador);
+    if (jug == nullptr) {
+        cout << "Jugador no encontrado" << endl;
+        return lista;
+    }
+    jug->trofeos = nuevosTrofeos;
+    cout << "Trofeos actualizados" << endl;
+    return lista;
+}
+
+Jugadores* modificarJugadorNombreLista(Jugadores *lista, int idJugador, string nombreAnterior, string nuevoNombre) {
+    if (lista == nullptr) {
+        cout << "No hay jugadores en la lista" << endl;
+        return lista;
+    }
+    Jugadores *jug = buscarJugadorLista(lista, idJugador);
+    if (jug == nullptr) {
+        cout << "Jugador no encontrado" << endl;
+        return lista;
+    }
+    if (jug->nombreUsuario == nombreAnterior) {
+        jug->nombreUsuario = nuevoNombre;
+        cout << "Nombre modificado" << endl;
+    } else {
+        cout << "El nombre anterior no coincide" << endl;
+    }
+    return lista;
+}
+
+Jugadores* modificarJugadorNivelReyLista(Jugadores *lista, int idJugador, int nuevoNivel) {
+    if (lista == nullptr) {
+        cout << "No hay jugadores en la lista" << endl;
+        return lista;
+    }
+    Jugadores *jug = buscarJugadorLista(lista, idJugador);
+    if (jug == nullptr) {
+        cout << "Jugador no encontrado" << endl;
+        return lista;
+    }
+    jug->nivelRey = nuevoNivel;
+    cout << "Nivel de rey actualizado" << endl;
+    return lista;
+}
+
+Jugadores* modificarJugadorClanLista(Jugadores *lista, int idJugador, int nuevoClan) {
+    if (lista == nullptr) {
+        cout << "No hay jugadores en la lista" << endl;
+        return lista;
+    }
+    Jugadores *jug = buscarJugadorLista(lista, idJugador);
+    if (jug == nullptr) {
+        cout << "Jugador no encontrado" << endl;
+        return lista;
+    }
+    jug->idClan = nuevoClan;
+    cout << "Clan actualizado" << endl;
+    return lista;
+}
+
+Jugadores* modificarJugadorArenaLista(Jugadores *lista, int idJugador, int nuevaArena) {
+    if (lista == nullptr) {
+        cout << "No hay jugadores en la lista" << endl;
+        return lista;
+    }
+    Jugadores *jug = buscarJugadorLista(lista, idJugador);
+    if (jug == nullptr) {
+        cout << "Jugador no encontrado" << endl;
+        return lista;
+    }
+    jug->idArena = nuevaArena;
+    cout << "Arena actualizada" << endl;
+    return lista;
+}
+
+Jugadores* eliminarJugadorLista(Jugadores *lista, int idJugador) {
+    if (lista == nullptr) {
+        cout << "Lista vacía" << endl;
+        return nullptr;
+    }
+    Jugadores *eliminar = buscarJugadorLista(lista, idJugador);
+    if (eliminar == nullptr) {
+        cout << "Jugador no encontrado" << endl;
+        return lista;
+    }
+
+    if (eliminar->ant == nullptr && eliminar->sig == nullptr) {
+        delete eliminar;
+        return nullptr;
+    }
+    
+    if (eliminar->ant == nullptr) {
+        lista = eliminar->sig;
+        lista->ant = nullptr;
+        delete eliminar;
+        return lista;
+    }
+
+    if (eliminar->sig == nullptr) {
+        eliminar->ant->sig = nullptr;
+        delete eliminar;
+        return lista;
+    }
+    
+    eliminar->ant->sig = eliminar->sig;
+    eliminar->sig->ant = eliminar->ant;
+    delete eliminar;
+    return lista;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
