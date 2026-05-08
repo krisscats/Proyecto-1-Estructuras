@@ -1,6 +1,25 @@
 #include <iostream>
 #include <string>
+#include <cstdlib>  
+#include <ctime>    
 using namespace std;
+
+int generarAleatorio(int mini, int maxi) {
+    return mini + rand() % (maxi - mini + 1);
+}
+
+float generarDuracion() {
+    return 0.01f + (float)rand() / RAND_MAX * 0.99f;
+}
+
+string generarFecha() {
+    int dia = generarAleatorio(1, 28);
+    int mes = generarAleatorio(1, 12);
+    int año = generarAleatorio(2020, 2026);
+
+    string fecha = to_string(dia) + " de " + to_string(mes) + " del " + to_string(año);
+    return fecha;
+}
 
 //apartado de prototipos (para no tener errores de indefinido y ademas el compi encuentre las funciones)
 void menuCartas();
@@ -160,6 +179,40 @@ void agregarCartaASublista(Mazo* mazoDestino, int idCartaBuscar) {
     nuevoNodo->cartaReal = encontrada;
     nuevoNodo->siguiente = mazoDestino->listaCartasMazo;
     mazoDestino->listaCartasMazo = nuevoNodo;
+}
+
+
+
+int dañoTotalMazo(Mazo *mazoActual) {
+    int sumaDaño = 0;
+    NodoCartaMazo* aux = mazoActual->listaCartasMazo;
+    while (aux != nullptr) {
+        sumaDaño += aux->cartaReal->danoBase;
+        aux = aux->siguiente;
+    }
+    return sumaDaño;
+}
+
+int vidaTotalMazo(Mazo *mazoActual) {
+    int sumaVida = 0;
+    NodoCartaMazo* aux = mazoActual->listaCartasMazo;
+    while (aux != nullptr) {
+        sumaVida += aux->cartaReal->vidaBase;
+        aux = aux->siguiente;
+    }
+    return sumaVida;
+}
+
+
+Mazo* buscarMazoxJugador(int idJugador) {
+    Mazo *temp = listaGlobalMazos;
+    while (temp != nullptr) {
+        if (temp->idJugador == idJugador) {
+            return temp;
+        }
+        temp = temp->siguiente;
+    }
+    return nullptr;
 }
 //ESTRUCTURA DE ARENAS
 struct Arena {
@@ -853,6 +906,101 @@ void liberarListaBatallas() {
     primeraBatalla = nullptr;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+///
+///
+///
+///
+///
+
+int generarIdNoRepetidoBatalla() {
+    int id;
+    do {
+        id = generarAleatorio(1000, 9999);
+    } while (buscarBatallaPorID(id) != nullptr);
+    return id;
+}
+
+//Simulación de batalla
+bool existeJugador(int jugador) {
+    if (buscarJugadorID(jugador) == nullptr) {
+        return false;
+    }
+    return true;
+}
+
+int generarArenaAleatorio(int jugador1, int jugador2) {
+    int arenaN = generarAleatorio(1,2);
+    int idArena;
+    if (arenaN == 1) {
+        Jugadores *jug = buscarJugadorID(jugador1);
+        idArena = jug->idArena;
+    }
+    else if (arenaN == 2) {
+        Jugadores *jug = buscarJugadorID(jugador2);
+        idArena = jug->idArena;
+    }
+    return idArena;
+}
+
+void registrarBatalla(int jugador1, int jugador2) {
+    Mazo *maz1 = buscarMazoxJugador(jugador1);
+    Mazo *maz2 = buscarMazoxJugador(jugador2);
+
+
+    if (existeJugador(jugador1) && existeJugador(jugador2) && jugador1 != jugador2 && maz1 != nullptr && maz2 != nullptr) {
+        float duracion = generarDuracion();
+        string fecha = generarFecha();
+        int idArena = generarArenaAleatorio(jugador1, jugador2);
+        //////////////////////////////////////////////
+        int ganador;
+        int coronas1 = generarAleatorio(0,3);
+        int coronas2 = generarAleatorio(0,2);
+        int coronasJ1 = 0, coronasJ2 = 0;
+        ////////////////////////////////////////////
+
+        int vida1 = vidaTotalMazo(maz1);
+        int vida2 = vidaTotalMazo(maz2);
+
+        int daño1 = dañoTotalMazo(maz1);
+        int daño2 = dañoTotalMazo(maz2);
+
+        int estadistica1 = vida1 - daño2;
+        int estadistica2 = vida2 - daño1;
+
+
+        if (estadistica1 < estadistica2) {
+            ganador = jugador2;
+            coronasJ2 = coronas1;
+            coronasJ1 = coronas2;
+
+        }
+        else if (estadistica2 < estadistica1) {
+            ganador = jugador1;
+            coronasJ1 = coronas1;
+            coronasJ2 = coronas2;
+        }
+        else if (estadistica1 == estadistica2) {
+            int maybe = generarAleatorio(1,2);
+            if (maybe == 1) {
+                ganador = jugador1;
+                coronasJ1 = coronas1;
+                coronasJ2 = coronas2;
+            }
+
+            else if (maybe == 2) {
+                ganador = jugador2;
+                coronasJ2 = coronas1;
+                coronasJ1 = coronas2;
+            }
+        }
+        ///////////////////////////////////////////
+        int idBatalla = generarIdNoRepetidoBatalla();
+
+        insertarBatallaAlFinal(idBatalla, jugador1,jugador2,maz1->idMazo,maz2->idMazo,ganador,coronasJ1,coronasJ2, duracion, idArena, fecha);
+    }
+
+}
 
 //______________________________________________
 // Funciones vacías para evitar errores de compilación (Faltantes en el menú)
