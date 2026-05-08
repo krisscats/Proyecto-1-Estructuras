@@ -28,9 +28,188 @@ void insertar(); //para Arena
 void imprimir(); //Para Arena
 void eliminar();  //para Arena
 
-void insertarClan();
-void imprimirClanes();
-void eliminarClan();
+//Funciones auxiliares de Clan
+
+//Verifica si la lista está vacía
+bool listaVaciaClan() {
+    return inicioClan == nullptr;
+}
+
+//Devuelve el último nodo de la lista circular
+Clan* obtenerUltimoClan() {
+    if (listaVaciaClan()) {
+        return nullptr;
+    }
+
+    Clan* temp = inicioClan;
+
+    while (temp->sig != inicioClan) {
+        temp = temp->sig;
+    }
+
+    return temp;
+}
+
+Clan* buscarClanPorId(int idClan) {
+    if (listaVaciaClan()) {
+        return nullptr;
+    }
+
+    Clan* temp = inicioClan;
+
+    do {
+        if (temp->idClan == idClan) {
+            return temp;
+        }
+        temp = temp->sig;
+    } while (temp != inicioClan);
+
+    return nullptr;
+}
+
+bool existeClan(int idClan) {
+    return buscarClanPorId(idClan) != nullptr;
+}
+
+void imprimirClan(Clan* c) {
+    if (c == nullptr) {
+        cout << "El clan no existe" << endl;
+        return;
+    }
+
+    cout << "ID del clan: " << c->idClan << endl;
+    cout << "Nombre del clan: " << c->nombreClan << endl;
+    cout << "Region: " << c->region << endl;
+    cout << "Cantidad de miembros: " << c->cantidadMiembros << endl;
+    cout << "Puntaje: " << c->puntajeClan << " min" << endl;
+}
+
+bool insertarClan(int idClan, string nombreClan, string region, int cantidadMiembros, int puntajeClan) {
+    if (existeClan(idClan)) {
+        cout << "Error: ya existe un clan con el ID " << idClan << "." << endl;
+        return false;
+    }
+
+    Clan* nueva = new Clan(idClan, nombreClan, region, cantidadMiembros, puntajeClan);
+
+    // Caso 1: lista vacía
+    if (listaVaciaClan()) {
+        inicioClan = nueva;
+        nueva->sig = inicioClan;
+        return true;
+    }
+
+    // Caso 2: insertar antes del primero
+    if (idClan < inicioClan->idClan) {
+        Clan* ultimo = obtenerUltimoClan();
+        nueva->sig = inicioClan;
+        ultimo->sig = nueva;
+        inicioClan = nueva;
+        return true;
+    }
+
+    // Caso 3: insertar en medio o al final
+    Clan* actual = inicioClan;
+
+    while (actual->sig != inicioClan && actual->sig->idClan < idClan) {
+        actual = actual->sig;
+    }
+
+    nueva->sig = actual->sig;
+    actual->sig = nueva;
+
+    return true;
+}
+
+
+//Mostrar todos los clanes
+void imprimirClanes() {
+    if (listaVaciaClan()) {
+        cout << "No hay clanes" << endl;
+        return;
+    }
+
+    Clan* temp = inicioClan;
+
+    cout << "===== CLANES =====" << endl;
+
+    do {
+        imprimirClan(temp);
+        cout << "-----------------------------" << endl;
+        temp = temp->sig;
+    } while (temp != inicioClan);
+}
+
+bool actualizarClanId(int idClan, string nuevoNombreClan, string nuevaRegion, int nuevaCantidadMiembros, int nuevoPuntajeClan) {
+    Clan* encontrado = buscarClanPorId(idClan);
+
+    if (encontrado == nullptr) {
+        return false;
+    }
+
+    encontrado->nombreClan = nuevoNombreClan;
+    encontrado->region = nuevaRegion;
+    encontrado->cantidadMiembros = nuevaCantidadMiembros;
+    encontrado->puntajeClan = nuevoPuntajeClan;
+
+    return true;
+}
+
+//Eliminar clan
+bool eliminarClan(int idClan) {
+    if (listaVaciaClan()) {
+        return false;
+    }
+
+    if (inicioClan->idClan == idClan && inicioClan->sig == inicioClan) {
+        delete inicioClan;
+        inicioClan = nullptr;
+        return true;
+    }
+
+    if (inicioClan->idClan == idClan) {
+        Clan* ultimo = obtenerUltimoClan();
+        Clan* eliminar = inicioClan;
+        inicioClan = inicioClan->sig; 
+        ultimo->sig = inicioClan;
+        delete eliminar;
+        return true;
+    }
+
+    Clan* actual = inicioClan;
+
+    while (actual->sig != inicioClan && actual->sig->idClan != idClan) {
+        actual = actual->sig;
+    }
+
+    if (actual->sig == inicioClan) {
+        return false;
+    }
+
+    Clan* eliminar = actual->sig;
+    actual->sig = eliminar->sig;
+    delete eliminar;
+
+    return true;
+}
+
+// Liberar memoria
+void liberarListaClan() {
+    if (listaVaciaClan()) {
+        return;
+    }
+
+    Clan* actual = inicioClan->sig;
+
+    while (actual != inicioClan) {
+        Clan* temp = actual;
+        actual = actual->sig;
+        delete temp;
+    }
+
+    delete inicioClan;
+    inicioClan = nullptr;
+}
 
 void insertarBatalla();
 void imprimirBatallas();
@@ -238,16 +417,17 @@ struct Batallas {
 };
 Batallas *primerBatalla= nullptr, *colaBatalla = nullptr;
 
-struct Clanes {
-    int IDClan;
+//____________ ESTRUCTURA DE CLAN ______________
+struct Clan {
+    int idClan;
     string nombreClan;
     string region;
     int cantidadMiembros;
     int puntajeClan;
-    Clanes *sig;
+    Clan *sig;
 
-    Clanes(int i, string n, string r, int c, int p) {
-        IDClan = i;
+    Clan(int i, string n, string r, int c, int p) {
+        idClan = i;
         nombreClan = n;
         region = r;
         cantidadMiembros = c;
@@ -257,22 +437,8 @@ struct Clanes {
 
     }
 };
-Clanes* inicioClanes = nullptr;
-void insertarClanCircularFinal(int i, string n, string r, int c, int p) {
-    Clanes* nuevo = new Clanes(i, n, r, c, p);
-    if (inicioClanes == nullptr) {
-        inicioClanes = nuevo;
-        nuevo->sig = inicioClanes;
-    } else {
-        Clanes* aux = inicioClanes;
-        while (aux->sig != inicioClanes) {
-            aux = aux->sig;
-        }
-        aux->sig = nuevo;
-        nuevo->sig = inicioClanes;
-    }
-    cout << "Clan guardado (Circular)" << endl;
-}
+Clan* inicioClan = nullptr;
+
 
 //____________ ESTRUCTURA DE JUGADOR ______________
 
