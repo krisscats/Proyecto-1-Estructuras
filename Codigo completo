@@ -843,23 +843,53 @@ bool eliminarBatalla(int IDBatalla) {
     return true;
 }
 
+Batallas *batallasxJugador(int id) {
+    if (primeraBatalla == nullptr) {
+        cout << "No hay batallas registradas" << endl;
+        return nullptr;
+    }
+
+    Batallas *temp = primeraBatalla;
+    do {
+        if (temp->ganador == id)
+            return temp;
+        temp = temp->sig;
+    } while (temp != primeraBatalla);
+    return nullptr;
+}
+
+void imprimirBatalla(Batallas *batalla) {
+    if (primeraBatalla == nullptr) {
+        cout << "No hay batallas registradas" << endl;
+        return;
+    }
+
+    Batallas *temp = primeraBatalla;
+
+    cout << "ID Batalla: " << temp->IDBatalla
+         << ", Jugador1: " << temp->IDJugador1
+         << ", Jugador2: " << temp->IDJugador2
+         << ", Mazo1: " << temp->IDMazo1
+         << ", Mazo2: " << temp->IDMazo2
+         << ", Ganador: " << temp->ganador
+         << ", Coronas J1: " << temp->coronasJ1
+         << ", Coronas J2: " << temp->coronasJ2
+         << ", Duración: " << temp->duracion
+         << ", Arena: " << temp->IDArena
+         << ", Fecha: " << temp->fecha << endl;
+    cout << "-----------------------------" << endl;
+}
+
 void imprimirBatallas() {
-    if (primeraBatalla == nullptr) { cout << "No hay batallas registradas" << endl; return; }
-    Batallas* temp = primeraBatalla;
+    if (primeraBatalla == nullptr) {
+        cout << "No hay batallas registradas" << endl;
+        return;
+    }
+
+    Batallas *temp = primeraBatalla;
     cout << "----- BATALLAS -----" << endl;
     do {
-        cout << "ID Batalla: "  << temp->IDBatalla
-             << ", Jugador1: "  << temp->IDJugador1
-             << ", Jugador2: "  << temp->IDJugador2
-             << ", Mazo1: "     << temp->IDMazo1
-             << ", Mazo2: "     << temp->IDMazo2
-             << ", Ganador: "   << temp->ganador
-             << ", Coronas J1: "<< temp->coronasJ1
-             << ", Coronas J2: "<< temp->coronasJ2
-             << ", Duracion: "  << temp->duracion
-             << ", Arena: "     << temp->IDArena
-             << ", Fecha: "     << temp->fecha << endl;
-        cout << "-----------------------------" << endl;
+        imprimirBatalla(temp);
         temp = temp->sig;
     } while (temp != primeraBatalla);
 }
