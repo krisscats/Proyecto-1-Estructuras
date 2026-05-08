@@ -1701,214 +1701,141 @@ void consultas() {
 
 
 //REPORTES
-// Imprimen vistas detalladas y cruzadas de los datos del sistema.
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Funciones reportes
+void imprimirTodo() {
 
-
-void reporte1TodasListas() {
-    imprimirCartas();
-    imprimirJugadores();
-    imprimirMazos();
-    imprimirClanes();
-    imprimirArenas();
-    imprimirBatallas();
 }
-/*
- * Reporte 2: para cada jugador muestra su arena, clan y mazos. vCruza información entre listas usando los IDs de referencia.
- */
-void reporte2DetalladoJugadores() {
-    if (!primerJugador) { cout << "No hay jugadores." << endl; return; }
-    cout << "\n===== REPORTE DETALLADO DE JUGADORES =====" << endl;
-    Jugadores* auxJ = primerJugador;
-    while (auxJ != nullptr) {
-        cout << "\n[" << auxJ->idJugador << "] " << auxJ->nombreUsuario
-             << " | Nivel: " << auxJ->nivelRey << " | Trofeos: " << auxJ->trofeos << endl;
-//buscar arena
-        Arena* auxA = listaArenas;
-        while (auxA != nullptr) {
-            if (auxA->IdArena == auxJ->idArena) { cout << "  Arena: " << auxA->nombreArena << endl; break; }
-            auxA = auxA->sig;
-        }
-        //buscar clan
-        if (!listaVaciaClan()) {
-            Clanes* auxC = inicioClan;
-            do {
-                if (auxC->idClan == auxJ->idClan) { cout << "  Clan: " << auxC->nombreClan << endl; break; }
-                auxC = auxC->sig;
-            } while (auxC != inicioClan);
-        }
-        //listar mazos del jugador
-        cout << "  Mazos:" << endl;
-        Mazo* auxM = listaGlobalMazos;
-        bool hayMazo = false;
-        while (auxM != nullptr) {
-            if (auxM->idJugador == auxJ->idJugador) {
-                cout << "    -> " << auxM->nombreMazo << " (" << contarCartasEnMazo(auxM) << " cartas)" << endl;
-                hayMazo = true;
-            }
-            auxM = auxM->siguiente;
-        }
-        if (!hayMazo) cout << "    (sin mazos)" << endl;
-        auxJ = auxJ->sig;
+void reporteJugador(){}
+
+void reporteMazos(){}
+
+void reporteClanes() {
+    if (listaVaciaClan()) {
+        cout << "No hay clanes" << endl;
+        return;
     }
-}
 
-//reporte 3: cada mazo con sus 8 cartas
-void reporte3MazosConCartas() {
-    if (listaGlobalMazos == nullptr) { cout << "No hay mazos." << endl; return; }
-    cout << "\n===== MAZOS CON SUS CARTAS =====" << endl;
-    Mazo* aux = listaGlobalMazos;
-    while (aux != nullptr) {
-        cout << "\nMazo [" << aux->idMazo << "] " << aux->nombreMazo
-             << " | Jugador ID: " << aux->idJugador << endl;
-        NodoCartaMazo* c = aux->listaCartasMazo;
-        int i = 1;
-        while (c != nullptr) {
-            cout << "  " << i++ << ". " << c->cartaReal->nombre
-                 << " | Elixir: " << c->cartaReal->costoElixir
-                 << " | Tipo: " << c->cartaReal->tipo << endl;
-            c = c->siguiente;
-        }
-        aux = aux->siguiente;
-    }
-}
+    Clanes* clan = inicioClan;
 
-void reporte4ClanesMiembros() {
-    if (listaVaciaClan()) { cout << "No hay clanes." << endl; return; }
-    cout << "\n===== CLANES Y SUS MIEMBROS =====" << endl;
-    Clanes* auxC = inicioClan;
     do {
-        cout << "\nClan [" << auxC->idClan << "] " << auxC->nombreClan
-             << " | Region: " << auxC->region << endl;
-//mostrar miembros por idClan en la lista global de jugadores
-        Jugadores* auxJ = primerJugador;
-        bool hay = false;
-        while (auxJ != nullptr) {
-            if (auxJ->idClan == auxC->idClan) {
-                cout << "  -> " << auxJ->nombreUsuario << " (ID: " << auxJ->idJugador << ")" << endl;
-                hay = true;
-            }
-            auxJ = auxJ->sig;
-        }
-        if (!hay) cout << "  (sin jugadores)" << endl;
-        auxC = auxC->sig;
-    } while (auxC != inicioClan);
+        imprimirClan(clan);
+        imprimirJugadores(clan->subListaJugadores);
+    } while (clan != inicioClan);
 }
 
-void reporte5ArenaJugadores() {
-    if (listaArenas == nullptr) { cout << "No hay arenas." << endl; return; }
-    cout << "\n===== ARENAS Y SUS JUGADORES =====" << endl;
-    Arena* auxA = listaArenas;
-    while (auxA != nullptr) {
-        cout << "\nArena [" << auxA->IdArena << "] " << auxA->nombreArena
-             << " (" << auxA->trofeosMin << "-" << auxA->trofeosMax << " trofeos)" << endl;
-        Jugadores* auxJ = primerJugador;
-        bool hay = false;
-        while (auxJ != nullptr) {
-            if (auxJ->idArena == auxA->IdArena) {
-                cout << "  -> " << auxJ->nombreUsuario << " (" << auxJ->trofeos << " trofeos)" << endl;
-                hay = true;
-            }
-            auxJ = auxJ->sig;
-        }
-        if (!hay) cout << "  (sin jugadores)" << endl;
-        auxA = auxA->sig;
+void reporteArenas(){}
+
+void reporteBatallas() {
+    if (primeraBatalla == nullptr) {
+        cout << "No hay batallas registradas" << endl;
+        return;
     }
-}
 
-//reporte 6: batallas con jugadores, mazos, coronas y ganador
-void reporte6Batallas() {
+    Batallas *temp = primeraBatalla;
     imprimirBatallas();
+    cout<<"PRIMER JUGADOR"<<endl;
+    imprimirJugador(temp->IDJugador1);
+    cout<<"SEGUNDO JUGADOR"<<endl;
+    imprimirJugador(temp->IDJugador2);
+    imprimirCartas();
+
+
 }
 
-   /*
-Reporte 7: ordena las cartas por costo de elixir usando burbuja. intercambia los datos dentro de los nodos (no los punteros).
-*/
-void reporte7CartasPorElixir() {
-    if (listaCartas == nullptr) { cout << "No hay cartas." << endl; return; }
-    int n = 0;
-    Carta* aux = listaCartas;
-    while (aux != nullptr) { n++; aux = aux->sig; }
-//burbuja sobre los nodos intercambiando datos
-    for (int i = 0; i < n - 1; i++) {
-        aux = listaCartas;
-        for (int j = 0; j < n - i - 1; j++) {
-            if (aux->costoElixir > aux->sig->costoElixir) {
-                swap(aux->idCarta,     aux->sig->idCarta);
-            swap(aux->nombre,      aux->sig->nombre);
-                swap(aux->rareza,      aux->sig->rareza);
-                swap(aux->tipo,        aux->sig->tipo);
-                swap(aux->costoElixir, aux->sig->costoElixir);
-                swap(aux->danoBase,    aux->sig->danoBase);
-                swap(aux->vidaBase,    aux->sig->vidaBase);
-            }
-            aux = aux->sig;
-        }
-    }
-    cout << "\n===== CARTAS ORDENADAS POR ELIXIR =====" << endl;
-    aux = listaCartas;
-    while (aux != nullptr) {
-        cout << "[Elixir " << aux->costoElixir << "] "
-             << aux->nombre << " | " << aux->rareza << " | " << aux->tipo << endl;
-        aux = aux->sig;
-    }
+void reporteCartas(){}
+
+void reporteJugadoresNombre() {
+    imprimirJugadores();
 }
 
-void reporte8JugadoresAlfabetico() {
-    cout << "\n===== JUGADORES EN ORDEN ALFABETICO =====" << endl;
-    if (!primerJugador) { cout << "No hay jugadores." << endl; return; }
-    Jugadores* temp = primerJugador;
-    while (temp != nullptr) {
-        cout << temp->nombreUsuario << " (ID: " << temp->idJugador
-             << ", Trofeos: " << temp->trofeos << ")" << endl;
+void reporteBatallasGanadas() {
+    Jugadores *temp = primerJugador;
+    if (!primerJugador) {
+        cout << "No hay jugadores"<<endl;
+        return;
+    }
+    cout<<"----- BATALLAS GANADAS POR JUGADOR -----"<<endl;
+    while (temp->sig)
         temp = temp->sig;
+    while (temp) {
+        Batallas *ganadas = buscarJugadorID(temp->idJugador);
+        cout<<"JUGADOR "<<temp->idJugador<<endl;
+        imprimirBatalla(ganadas);
+
+        temp = temp->ant;
     }
 }
 
-void reporte9BatallasPorJugador() {
-    if (!primerJugador) { cout << "No hay jugadores." << endl; return; }
-    if (primeraBatalla == nullptr) { cout << "No hay batallas." << endl; return; }
-    cout << "\n===== BATALLAS GANADAS POR JUGADOR =====" << endl;
-    Jugadores* auxJ = primerJugador;
-    while (auxJ != nullptr) {
-        int ganadas = 0;
-        Batallas* auxB = primeraBatalla;
-        do {
-            if ((auxB->ganador == auxJ->idJugador)) ganadas++;
-            auxB = auxB->sig;
-        } while (auxB != primeraBatalla);
-        cout << auxJ->nombreUsuario << ": " << ganadas << " victorias" << endl;
-        auxJ = auxJ->sig;
-    }
+///Reportes
+int menuReportes() {
+    cout << "-------------- REPORTES --------------" << endl;
+    cout << "   Elija una opcion" << endl;
+    cout << "1. Imprimir todas las listas principales" << endl;
+    cout << "2. Reporte detallado de cada jugador (con arena, clan y mazos)" << endl;
+    cout << "3. Lista de mazos con sus 8 cartas" << endl;
+    cout << "4. Reporte de clanes con sus miembros" << endl;
+    cout << "5. Reporte de arenas con los jugadores que pertenecen a cada una" << endl;
+    cout << "6. Reporte de batallas (jugadores, mazos, coronas, ganador)" << endl;
+    cout << "7. Reporte de cartas ordenadas por costo de elixir" << endl;
+    cout << "8. Reporte de jugadores ordenados alfabeticamente" << endl;
+    cout << "9. Reporte de batallas ganadas por cada jugador" << endl;
+    cout << "0. Salir" << endl;
+    int opcion;
+    cin >> opcion;
+    return opcion;
 }
 
-void menuReportes() {
-    int opcion = -1;
-    while (opcion != 0) {
-        cout << "\n----- REPORTES -----" << endl;
-        cout << "1. Todas las listas principales" << endl;
-        cout << "2. Detalle de jugadores (arena, clan, mazos)" << endl;
-        cout << "3. Mazos con sus 8 cartas" << endl;
-        cout << "4. Clanes con sus miembros" << endl;
-        cout << "5. Arenas con sus jugadores" << endl;
-        cout << "6. Batallas (jugadores, mazos, coronas, ganador)" << endl;
-        cout << "7. Cartas ordenadas por costo de elixir" << endl;
-        cout << "8. Jugadores en orden alfabetico" << endl;
-        cout << "9. Batallas ganadas por cada jugador" << endl;
-        cout << "0. Salida" << endl;
-        cout << "Opcion: ";
-        cin >> opcion;
-        if      (opcion == 1) reporte1TodasListas();
-        else if (opcion == 2) reporte2DetalladoJugadores();
-        else if (opcion == 3) reporte3MazosConCartas();
-        else if (opcion == 4) reporte4ClanesMiembros();
-        else if (opcion == 5) reporte5ArenaJugadores();
-        else if (opcion == 6) reporte6Batallas();
-        else if (opcion == 7) reporte7CartasPorElixir();
-        else if (opcion == 8) reporte8JugadoresAlfabetico();
-        else if (opcion == 9) reporte9BatallasPorJugador();
-        else if (opcion != 0) cout << "Opcion invalida." << endl;
-    }
+void reportes() {
+    int opcion;
+    do {
+        opcion = menuReportes();
+
+        if (opcion == 1) {
+            cout << "Reporte 1: imprimir todas las listas principales" << endl;
+
+        }
+        else if (opcion == 2) {
+            cout << "Reporte 2: detalle de cada jugador (arena, clan, mazos)" << endl;
+
+        }
+        else if (opcion == 3) {
+            cout << "Reporte 3: lista de mazos con sus 8 cartas" << endl;
+
+        }
+        else if (opcion == 4) {
+            cout << "Reporte 4: clanes con sus miembros" << endl;
+
+        }
+        else if (opcion == 5) {
+            cout << "Reporte 5: arenas con sus jugadores" << endl;
+
+        }
+        else if (opcion == 6) {
+            cout << "Reporte 6: batallas (jugadores, mazos, coronas, ganador)" << endl;
+
+        }
+        else if (opcion == 7) {
+            cout << "Reporte 7: cartas ordenadas por costo de elixir" << endl;
+
+        }
+        else if (opcion == 8) {
+            cout << "Reporte 8: jugadores ordenados alfabeticamente" << endl;
+
+        }
+        else if (opcion == 9) {
+            cout << "Reporte 9: batallas ganadas por cada jugador" << endl;
+        }
+        else if (opcion == 0) {
+            cout << "FIN DE REPORTES" << endl;
+        }
+        else {
+            cout << "Opción no válida" << endl;
+        }
+
+    } while (opcion != 0);
 }
+
 
 //CARGA AUTOMATICA
 //10+ registros por entidad para probar el sistema desde el inicio.
