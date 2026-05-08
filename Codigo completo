@@ -1,6 +1,41 @@
 #include <iostream>
 #include <string>
 using namespace std;
+
+//apartado de prototipos (para no tener errores de indefinido y ademas el compi encuentre las funciones)
+void menuCartas();
+void menuJugadores();
+void menuMazos();
+void menuBatallas();
+void menuClanes();
+void menuArenas();
+void mantenimiento();
+
+void insertarCarta();
+void imprimirCartas();
+void modificarDatos(); 
+void eliminarCarta();
+
+void insertarJugador();
+void imprimirJugadores();
+void eliminarJugador();
+
+void insertarMazo();
+void imprimirMazos();
+void eliminarMazo();
+
+void insertar(); //para Arena
+void imprimir(); //Para Arena
+void eliminar();  //para Arena
+
+void insertarClan();
+void imprimirClanes();
+void eliminarClan();
+
+void insertarBatalla();
+void imprimirBatallas();
+void eliminarBatalla();
+//____________________________________________
 struct Carta{
     int idCarta;  //IDCarta, nombre, rareza, tipo, costoElixir, dañoBase, vidaBase
     string nombre;
@@ -30,7 +65,7 @@ if(nom == "" || rar == "" || tipo == "" ){
     cout << "Datos invalidos: los campos de texto no pueden estar vacios" << endl;  
     return;
 }
-//Silos datos son válidos
+//Silos datos son validos
     Carta* nueva = new Carta(); 
     nueva->idCarta = id;
     nueva->nombre = nom;
@@ -40,13 +75,13 @@ if(nom == "" || rar == "" || tipo == "" ){
     nueva->danoBase = danB;
     nueva->vidaBase = vidB;
 
-    //se pone al inicio
+    //se pone el inicio
     nueva->sig = listaCartas; //a nueva carta apunta a la que era la primera
     listaCartas = nueva;        //el inicio ahora es la nueva carta
 
     cout << "Carta guardada con exito :)" << endl;
 } 
-
+//estructura para mazos
 struct NodoCartaMazo {
     Carta* cartaReal;      
     NodoCartaMazo* siguiente;
@@ -93,11 +128,11 @@ void insertarMazoFinal(int id, string nombre, string tipo, int idJ) {
     if (listaGlobalMazos == nullptr) {
         listaGlobalMazos = nuevoMazo; 
     } else {
-        Mazo* auxiliar = listaGlobalMazos;
+     Mazo* auxiliar = listaGlobalMazos;
         while (auxiliar->siguiente != nullptr) {
             auxiliar = auxiliar->siguiente;
         }
-        auxiliar->siguiente = nuevoMazo;
+auxiliar->siguiente = nuevoMazo;
     }
 }
 
@@ -138,8 +173,35 @@ void agregarCartaASublista(Mazo* mazoDestino, int idCartaBuscar) {
     nuevoNodo->siguiente = mazoDestino->listaCartasMazo;
     mazoDestino->listaCartasMazo = nuevoNodo;
 }
+//ESTRUCTURA DE ARENAS
+struct Arena {
+    int IdArena;
+    string nombreArena;
+    int trofeosMin;
+    int trofeosMax;
+    Arena* sig; //insercion al inicio
+};
+//puntero global para lista de arenas
+Arena* listaArenas = nullptr; 
+//insersion simple al principio
+void insertarArenaInicio(int id, string nom, int tMin, int tMax) {
+    Arena* aux = listaArenas;
+    while(aux) {
+        if(aux->IdArena == id) { cout << "ID Arena repetido." << endl; return; }
+        aux = aux->sig;
+    }
+    Arena* nueva = new Arena();
+    nueva->IdArena = id;
+    nueva->nombreArena = nom;
+    nueva->trofeosMin = tMin;
+    nueva->trofeosMax = tMax;
+    nueva->sig = listaArenas;
+    listaArenas = nueva;
+    cout << "Arena creada!" << endl;
+}
 
 
+//BATALLAS
 struct Batallas {
     int IDBatalla;
     int IDJugador1;
@@ -173,7 +235,8 @@ struct Batallas {
         sig = NULL;
         ant = NULL;
     }
-} *primerBatalla, *colaBatalla;
+};
+Batallas *primerBatalla= nullptr, *colaBatalla = nullptr;
 
 struct Clanes {
     int IDClan;
@@ -181,9 +244,6 @@ struct Clanes {
     string region;
     int cantidadMiembros;
     int puntajeClan;
-
-    Jugadores *listaJugadores;
-
     Clanes *sig;
 
     Clanes(int i, string n, string r, int c, int p) {
@@ -198,7 +258,22 @@ struct Clanes {
     }
 };
 Clanes* inicioClanes = nullptr;
-
+void insertarClanCircularFinal(int i, string n, string r, int c, int p) {
+    Clanes* nuevo = new Clanes(i, n, r, c, p);
+    if (inicioClanes == nullptr) {
+        inicioClanes = nuevo;
+        nuevo->sig = inicioClanes;
+    } else {
+        Clanes* aux = inicioClanes;
+        while (aux->sig != inicioClanes) {
+            aux = aux->sig;
+        }
+        aux->sig = nuevo;
+        nuevo->sig = inicioClanes;
+    }
+    cout << "Clan guardado (Circular)" << endl;
+}
+//____________ ESTRUCTURA DE JUGADOR ______________
 struct Jugadores {
 
     int IDJugador;
@@ -209,8 +284,8 @@ struct Jugadores {
     int IDClan;
 
     Clanes *clanJ;
-    Arenas *arenaJ;
-    Mazos *mazoJ;
+    Arena *arenaJ;
+    Mazo *mazoJ;
     Batallas *batallasJ;
 
     Jugadores *sig, *ant;
@@ -232,36 +307,43 @@ struct Jugadores {
     }
 } *primerJugador; //Apunta al primer jugador de la lista
 
+//______________________________________________
+// Funciones vacías para evitar errores de compilación (Faltantes en el menú)
+void modificarDatos() { cout << "En desarrollo..." << endl; }
+void eliminarCarta() { cout << "En desarrollo..." << endl; }
+void eliminarJugador() { cout << "En desarrollo..." << endl; }
+void eliminarMazo() { cout << "En desarrollo..." << endl; }
+void insertarArena() { int id, min, max; string nom; cout << "ID: "; cin >> id; cout << "Nombre: "; cin >> nom; cout << "Min: "; cin >> min; cout << "Max: "; cin >> max; insertarArenaInicio(id, nom, min, max); }
+void eliminarArena() { cout << "En desarrollo..." << endl; }
+void insertarClan() { int id, cant, pts; string nom, reg; cout << "ID: "; cin >> id; cout << "Nom: "; cin >> nom; cout << "Reg: "; cin >> reg; insertarClanCircularFinal(id, nom, reg, 0, 0); }
+void imprimirClanes() { if(!inicioClanes) return; Clanes* aux = inicioClanes; do { cout << "Clan: " << aux->nombreClan << endl; aux = aux->sig; } while(aux != inicioClanes); }
+void eliminarClan() { cout << "En desarrollo..." << endl; }
+void insertarBatalla() { cout << "En desarrollo..." << endl; }
+void imprimirBatallas() { cout << "En desarrollo..." << endl; }
+void eliminarBatalla() { cout << "En desarrollo..." << endl; }
+//MENU!!!
 ////Mantenimiento
-
+//carga o datos quemados para probar el codigo
+void cargaAutomatica() {
+    insertarArenaInicio(1, "Arena Selvatica", 0, 1000);
+    insercioninicio(1, "Pekka", "Epica", "Tropa", 7, 600, 3000);
+    insertarJugadorOrdenado(1, "Alex", 10, 500, 1, 0);
+    insertarJugadorOrdenado(2, "Pepe", 10, 600, 1, 0); // Quedará antes que Zoro
+    insertarClanCircularFinal(1, "Los Pro", "CR", 1, 100);
+    cout << "Datos base cargados" << endl;
+}
 void menuCartas() {
-    cout<<"Elija una opcion:"<<endl;
-    cout<<"1.Crear"<<endl;
-    cout<<"2.Leer"<<endl;
-    cout<<"3.Actualizar"<<endl;
-    cout<<"4.Eliminar"<<endl;
-    cout<<"0.Salida"<<endl;
+    int opcion = -1;
+    while (opcion != 0) { // El bucle mantiene vivo el menú
+        cout << "\n1.Crear\n2.Leer\n3.Actualizar\n4.Eliminar\n0.Salida\nOpcion: ";
+        cin >> opcion;
 
-    int opcion;
-    cin>>opcion;
-    while (opcion) {
-        if (opcion == 1) {
-            insertarCarta();
-            return menuCartas();
-        }
-        else if (opcion == 2) {
-            imprimirCartas();
-            return menuCartas();
-        }
-        else if (opcion == 3) {
-            modificarDatos();
-            return menuCartas();
-        }
-        else if (opcion == 4) {
-            eliminarCarta();
-            return menuCartas();
-        }
+        if (opcion == 1) insertarCarta();
+        else if (opcion == 2) imprimirCartas();
+        else if (opcion == 3) modificarDatos();
+        else if (opcion == 4) eliminarCarta();
     }
+    // Al salir del while, la función termina y regresa solita al menú anterior
 }
 void menuJugadores() {
     cout<<"Elija una opcion:"<<endl;
