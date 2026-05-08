@@ -17,7 +17,7 @@ float generarDuracion() {
     return 0.01f + (float)rand() / RAND_MAX * 0.99f;
 }
 
-//Genera una fecha legible aleatoria para las batallas
+//genera una fecha legible aleatoria para las batallas
 string generarFecha() {
     int dia = generarAleatorio(1, 28);
     int mes = generarAleatorio(1, 12);
@@ -54,6 +54,7 @@ void eliminarJugadorMenu();
 void insertarMazo();
 void imprimirMazos();
 void eliminarMazo();
+void modificarMazo(); //prototipo agregado para actualizacion de mazos
 //arena
 void insertarArena();
 void imprimirArenas();
@@ -62,10 +63,12 @@ void eliminarArena();
 void insertarClan();
 void imprimirClanes();
 void eliminarClanMenu();
+void modificarClan(); //prototipo agregado para actualizacion de clanes
 //batalla
 void insertarBatalla();
 void imprimirBatallas();
 void eliminarBatallaMenu();
+void modificarBatallaMenu(); //prototipo agregado para actualizacion de batallas
 
 //prototipos de búsqueda adelantados
 Jugadores* buscarJugadorID(int IDJugador);
@@ -77,13 +80,13 @@ Batallas*  buscarBatallaPorID(int IDBatalla);
 struct Carta {
     int idCarta;        //ID unico de la carta
     string nombre;
-    string rareza;      
-    string tipo;       
+    string rareza;
+    string tipo;
     int costoElixir;
     int danoBase;
     int vidaBase;
     Carta* sig;         //apunta a la siguiente carta en la lista
-      //constructor: inicializa puntero sig a nullptr por seguridad
+    //constructor: inicializa puntero sig a nullptr por seguridad
     Carta() : idCarta(0), costoElixir(0), danoBase(0), vidaBase(0), sig(nullptr) {}
 };
 Carta* listaCartas = nullptr; //puntero global al inicio de la lista de cartas
@@ -128,14 +131,13 @@ void insercioninicio(int id, string nom, string rar, string tipo, int costE, int
     cout << "Carta guardada con exito :)" << endl;
 }
 
-// =====================================================================
-// ESTRUCTURA: Mazo y NodoCartaMazo
-// Tipo de lista: Simple, inserción al final
+//ESRUCTURA: Mazo y NodoCartaMazo
+//tipo de lista: Simple, inserción al final
 // Cada mazo tiene una sublista de exactamente 8 cartas.
 // Las cartas en el mazo son punteros a las cartas globales (sin copiar datos).
-// =====================================================================
+//__________________
 struct NodoCartaMazo {
-    Carta* cartaReal;        // Puntero a la carta real en listaCartas (sin duplicar)
+    Carta* cartaReal;        //puntero a la carta real en listaCartas (sin duplicar)
     NodoCartaMazo* siguiente;
 
     // constructor: inicializa punteros a nullptr
@@ -261,17 +263,29 @@ Mazo* buscarMazoxJugador(int idJugador) {
     return nullptr;
 }
 
-//eSTRUCTURA: Arena  tipo de lista: simple, insercion al inicio
+//buscarMazoPorID: retorna el mazo con el ID indicado, o nullptr si no existe
+Mazo* buscarMazoPorID(int idMazo) {
+    Mazo* temp = listaGlobalMazos;
+    while (temp != nullptr) {
+        if (temp->idMazo == idMazo) return temp;
+        temp = temp->siguiente;
+    }
+    return nullptr;
+}
+
+// ESTRUCTURA: Arena  tipo de lista: simple, insercion al inicio
 //clasifica a los jugadores segun su rango de trofeos.
 struct Arena {
     int IdArena;
     string nombreArena;
     int trofeosMin;   //trrofeos minimos para pertenecer a esta arena
     int trofeosMax;   //trofeos máximos para pertenecer a esta arena
-    Arena* sig;    
-     Arena() : IdArena(0), trofeosMin(0), trofeosMax(0), sig(nullptr) {}   
+    Arena* sig;
+
+    // constructor: inicializa valores numericos y puntero sig a nullptr
+    Arena() : IdArena(0), trofeosMin(0), trofeosMax(0), sig(nullptr) {}
 };
-Arena* listaArenas = nullptr; 
+Arena* listaArenas = nullptr;
 
 void insertarArenaInicio(int id, string nom, int tMin, int tMax) {
     // Verificar ID duplicado
@@ -319,7 +333,7 @@ struct Clanes {
         sig              = nullptr;
     }
 };
-Clanes* inicioClan = nullptr; 
+Clanes* inicioClan = nullptr;
 
 // ESTRUCTURA: Jugadores tipo de lista: Doble, ordenada por nombre de usuario
 //prrmite recorrer hacia adelante(sig) y hacia atras(ant)
@@ -329,8 +343,8 @@ struct Jugadores {
     string nombreUsuario;
     int nivelRey;
     int trofeos;
-    int idArena;  
-    int idClan;   
+    int idArena;
+    int idClan;
     Jugadores* sig;
     Jugadores* ant;
 
@@ -354,10 +368,10 @@ struct Batallas {
     int IDJugador2;
     int IDMazo1;
     int IDMazo2;
-    int ganador;    
-    int coronasJ1; 
-    int coronasJ2;  
-    float duracion; 
+    int ganador;
+    int coronasJ1;
+    int coronasJ2;
+    float duracion;
     int IDArena;
     string fecha;
     Batallas* sig;
@@ -379,7 +393,7 @@ struct Batallas {
         ant        = NULL;
     }
 };
-Batallas* primeraBatalla = nullptr; 
+Batallas* primeraBatalla = nullptr;
 
 // FUNCIONES DE JUGADORES
 //_______________________________
@@ -397,10 +411,25 @@ Jugadores* buscarJugadorID(int IDJugador) {
     return nullptr;
 }
 
+//buscarJugadorPorNombre: recorre la lista y retorna el nodo cuyo nombre coincide
+Jugadores* buscarJugadorPorNombre(string nombre) {
+    Jugadores* temp = primerJugador;
+    while (temp != nullptr) {
+        if (temp->nombreUsuario == nombre) return temp;
+        temp = temp->sig;
+    }
+    return nullptr;
+}
+
 void insertarJugadorOrdenadoPorNombre(int idJugador, string nombreUsuario, int nivelRey, int trofeos, int idArena, int idClan) {
     //validar ID duplicado
     if (buscarJugadorID(idJugador) != nullptr) {
         cout << "Error: ya existe un jugador con el ID " << idJugador << "." << endl;
+        return;
+    }
+    //validar que el nombre de usuario no este repetido
+    if (buscarJugadorPorNombre(nombreUsuario) != nullptr) {
+        cout << "Error: ya existe un jugador con el nombre '" << nombreUsuario << "'." << endl;
         return;
     }
     //validar que la arena exista y que los trofeos correspondan al rango
@@ -434,6 +463,29 @@ auxA = auxA->sig;
     if (primerJugador == nullptr) {
         primerJugador = nuevo;
         cout << "Jugador '" << nombreUsuario << "' registrado." << endl;
+        //agregar a sublista del clan si tiene uno asignado
+        if (idClan != 0) {
+            Clanes* clan = nullptr;
+            if (inicioClan != nullptr) {
+                Clanes* temp = inicioClan;
+                do {
+                    if (temp->idClan == idClan) { clan = temp; break; }
+                    temp = temp->sig;
+                } while (temp != inicioClan);
+            }
+            if (clan != nullptr) {
+                //insertar copia en sublista del clan
+                Jugadores* copia = new Jugadores(idJugador, nombreUsuario, nivelRey, trofeos, idArena, idClan);
+                if (clan->subListaJugadores == nullptr) {
+                    clan->subListaJugadores = copia;
+                } else {
+                    Jugadores* t = clan->subListaJugadores;
+                    while (t->sig != nullptr) t = t->sig;
+                    t->sig = copia;
+                    copia->ant = t;
+                }
+            }
+        }
         return;
     }
 //nsertar al inicio si va antes del primero (orden alfabético)
@@ -442,6 +494,28 @@ auxA = auxA->sig;
         primerJugador->ant = nuevo;
         primerJugador     = nuevo;
         cout << "Jugador '" << nombreUsuario << "' registrado." << endl;
+        //agregar a sublista del clan si tiene uno asignado
+        if (idClan != 0) {
+            Clanes* clan = nullptr;
+            if (inicioClan != nullptr) {
+                Clanes* temp = inicioClan;
+                do {
+                    if (temp->idClan == idClan) { clan = temp; break; }
+                    temp = temp->sig;
+                } while (temp != inicioClan);
+            }
+            if (clan != nullptr) {
+                Jugadores* copia = new Jugadores(idJugador, nombreUsuario, nivelRey, trofeos, idArena, idClan);
+                if (clan->subListaJugadores == nullptr) {
+                    clan->subListaJugadores = copia;
+                } else {
+                    Jugadores* t = clan->subListaJugadores;
+                    while (t->sig != nullptr) t = t->sig;
+                    t->sig = copia;
+                    copia->ant = t;
+                }
+            }
+        }
         return;
     }
 //Buscar la posición correcta
@@ -454,12 +528,39 @@ auxA = auxA->sig;
     nuevo->ant = temp;
     temp->sig  = nuevo;
     cout << "Jugador '" << nombreUsuario << "' registrado." << endl;
+    //agregar a sublista del clan si tiene uno asignado
+    if (idClan != 0) {
+        Clanes* clan = nullptr;
+        if (inicioClan != nullptr) {
+            Clanes* tc = inicioClan;
+            do {
+                if (tc->idClan == idClan) { clan = tc; break; }
+                tc = tc->sig;
+            } while (tc != inicioClan);
+        }
+        if (clan != nullptr) {
+            Jugadores* copia = new Jugadores(idJugador, nombreUsuario, nivelRey, trofeos, idArena, idClan);
+            if (clan->subListaJugadores == nullptr) {
+                clan->subListaJugadores = copia;
+            } else {
+                Jugadores* t = clan->subListaJugadores;
+                while (t->sig != nullptr) t = t->sig;
+                t->sig = copia;
+                copia->ant = t;
+            }
+        }
+    }
 }
 
 //funciones de modificación para jugadores
 void modificarJugadorNombre(int IDJugador, string nombreAnterior, string nuevoNombre) {
     Jugadores* temp = buscarJugadorID(IDJugador);
     if (!temp) { cout << "Jugador no existente" << endl; return; }
+    //validar que el nuevo nombre no este en uso
+    if (buscarJugadorPorNombre(nuevoNombre) != nullptr) {
+        cout << "Error: el nombre '" << nuevoNombre << "' ya esta en uso." << endl;
+        return;
+    }
     if (temp->nombreUsuario == nombreAnterior) {
         temp->nombreUsuario = nuevoNombre;
         cout << "Nombre modificado" << endl;
@@ -512,6 +613,30 @@ void eliminarJugador(int idJugador) {
     } else {
         if (buscado->ant) buscado->ant->sig = buscado->sig;
         if (buscado->sig) buscado->sig->ant = buscado->ant;
+    }
+    //eliminar tambien de la sublista del clan correspondiente
+    if (buscado->idClan != 0 && inicioClan != nullptr) {
+        Clanes* clan = nullptr;
+        Clanes* tc = inicioClan;
+        do {
+            if (tc->idClan == buscado->idClan) { clan = tc; break; }
+            tc = tc->sig;
+        } while (tc != inicioClan);
+        if (clan != nullptr && clan->subListaJugadores != nullptr) {
+            Jugadores* sub = clan->subListaJugadores;
+            Jugadores* antSub = nullptr;
+            while (sub != nullptr) {
+                if (sub->idJugador == idJugador) {
+                    if (antSub == nullptr) clan->subListaJugadores = sub->sig;
+                    else antSub->sig = sub->sig;
+                    if (sub->sig != nullptr) sub->sig->ant = antSub;
+                    delete sub;
+                    break;
+                }
+                antSub = sub;
+                sub = sub->sig;
+            }
+        }
     }
     delete buscado;
     cout << "Jugador eliminado" << endl;
@@ -843,53 +968,23 @@ bool eliminarBatalla(int IDBatalla) {
     return true;
 }
 
-Batallas *batallasxJugador(int id) {
-    if (primeraBatalla == nullptr) {
-        cout << "No hay batallas registradas" << endl;
-        return nullptr;
-    }
-
-    Batallas *temp = primeraBatalla;
-    do {
-        if (temp->ganador == id)
-            return temp;
-        temp = temp->sig;
-    } while (temp != primeraBatalla);
-    return nullptr;
-}
-
-void imprimirBatalla(Batallas *batalla) {
-    if (primeraBatalla == nullptr) {
-        cout << "No hay batallas registradas" << endl;
-        return;
-    }
-
-    Batallas *temp = primeraBatalla;
-
-    cout << "ID Batalla: " << temp->IDBatalla
-         << ", Jugador1: " << temp->IDJugador1
-         << ", Jugador2: " << temp->IDJugador2
-         << ", Mazo1: " << temp->IDMazo1
-         << ", Mazo2: " << temp->IDMazo2
-         << ", Ganador: " << temp->ganador
-         << ", Coronas J1: " << temp->coronasJ1
-         << ", Coronas J2: " << temp->coronasJ2
-         << ", Duración: " << temp->duracion
-         << ", Arena: " << temp->IDArena
-         << ", Fecha: " << temp->fecha << endl;
-    cout << "-----------------------------" << endl;
-}
-
 void imprimirBatallas() {
-    if (primeraBatalla == nullptr) {
-        cout << "No hay batallas registradas" << endl;
-        return;
-    }
-
-    Batallas *temp = primeraBatalla;
+    if (primeraBatalla == nullptr) { cout << "No hay batallas registradas" << endl; return; }
+    Batallas* temp = primeraBatalla;
     cout << "----- BATALLAS -----" << endl;
     do {
-        imprimirBatalla(temp);
+        cout << "ID Batalla: "  << temp->IDBatalla
+             << ", Jugador1: "  << temp->IDJugador1
+             << ", Jugador2: "  << temp->IDJugador2
+             << ", Mazo1: "     << temp->IDMazo1
+             << ", Mazo2: "     << temp->IDMazo2
+             << ", Ganador: "   << temp->ganador
+             << ", Coronas J1: "<< temp->coronasJ1
+             << ", Coronas J2: "<< temp->coronasJ2
+             << ", Duracion: "  << temp->duracion
+             << ", Arena: "     << temp->IDArena
+             << ", Fecha: "     << temp->fecha << endl;
+        cout << "-----------------------------" << endl;
         temp = temp->sig;
     } while (temp != primeraBatalla);
 }
@@ -933,6 +1028,16 @@ El jugador ganador sube un nivel de rey como recompensa.
 void registrarBatalla(int jugador1, int jugador2) {
     Mazo* maz1 = buscarMazoxJugador(jugador1);
     Mazo* maz2 = buscarMazoxJugador(jugador2);
+
+    //validar que los mazos pertenezcan a sus respectivos jugadores
+    if (maz1 != nullptr && maz1->idJugador != jugador1) {
+        cout << "Error: el mazo no pertenece al jugador 1." << endl;
+        return;
+    }
+    if (maz2 != nullptr && maz2->idJugador != jugador2) {
+        cout << "Error: el mazo no pertenece al jugador 2." << endl;
+        return;
+    }
 
     if (existeJugador(jugador1) && existeJugador(jugador2) && jugador1 != jugador2 && maz1 != nullptr && maz2 != nullptr) {
         float duracion = generarDuracion();
@@ -1025,6 +1130,19 @@ void eliminarCarta() {
     if (listaCartas == nullptr) { cout << "No hay cartas." << endl; return; }
     int id;
     cout << "ID carta a eliminar: "; cin >> id;
+    //verificar que la carta no este en uso en algun mazo antes de eliminar
+    Mazo* auxM = listaGlobalMazos;
+    while (auxM != nullptr) {
+        NodoCartaMazo* n = auxM->listaCartasMazo;
+        while (n != nullptr) {
+            if (n->cartaReal->idCarta == id) {
+                cout << "Error: la carta esta en uso en el mazo '" << auxM->nombreMazo << "'. Eliminela del mazo primero." << endl;
+                return;
+            }
+            n = n->siguiente;
+        }
+        auxM = auxM->siguiente;
+    }
     Carta* aux = listaCartas;
     Carta* ant = nullptr;
     while (aux != nullptr) {
@@ -1041,6 +1159,29 @@ void eliminarCarta() {
     cout << "No se encontro la carta con ID " << id << "." << endl;
 }
 
+//modificarCartaDatos: permite actualizar los campos de una carta existente por su ID
+void modificarCartaDatos() {
+    if (listaCartas == nullptr) { cout << "No hay cartas." << endl; return; }
+    int id;
+    cout << "ID de la carta a modificar: "; cin >> id;
+    Carta* aux = listaCartas;
+    while (aux != nullptr) {
+        if (aux->idCarta == id) {
+            cout << "1.Nombre  2.Rareza  3.Tipo  4.Elixir  5.Dano  6.Vida\nOpcion: ";
+            int op; cin >> op;
+            if (op == 1) { cout << "Nuevo nombre: "; cin >> aux->nombre; cout << "Nombre actualizado." << endl; }
+            else if (op == 2) { cout << "Nueva rareza: "; cin >> aux->rareza; cout << "Rareza actualizada." << endl; }
+            else if (op == 3) { cout << "Nuevo tipo: "; cin >> aux->tipo; cout << "Tipo actualizado." << endl; }
+            else if (op == 4) { int v; cout << "Nuevo elixir: "; cin >> v; if (v < 0) cout << "Valor invalido." << endl; else { aux->costoElixir = v; cout << "Elixir actualizado." << endl; } }
+            else if (op == 5) { int v; cout << "Nuevo dano: "; cin >> v; if (v < 0) cout << "Valor invalido." << endl; else { aux->danoBase = v; cout << "Dano actualizado." << endl; } }
+            else if (op == 6) { int v; cout << "Nueva vida: "; cin >> v; if (v < 0) cout << "Valor invalido." << endl; else { aux->vidaBase = v; cout << "Vida actualizada." << endl; } }
+            else cout << "Opcion invalida." << endl;
+            return;
+        }
+        aux = aux->sig;
+    }
+    cout << "No se encontro la carta con ID " << id << "." << endl;
+}
 
 void modificarDatos() {
     cout << "Modificar:\n1.Nombre jugador\n2.Nivel Rey\n3.Trofeos\n4.Arena\n5.Clan\nOpcion: ";
@@ -1172,6 +1313,26 @@ void eliminarMazo() {
     cout << "No se encontro el mazo con ID " << id << "." << endl;
 }
 
+//modificarMazo: permite cambiar nombre o tipo de un mazo existente por su ID
+void modificarMazo() {
+    if (listaGlobalMazos == nullptr) { cout << "No hay mazos." << endl; return; }
+    int id;
+    cout << "ID del mazo a modificar: "; cin >> id;
+    Mazo* m = buscarMazoPorID(id);
+    if (m == nullptr) { cout << "Mazo no encontrado." << endl; return; }
+    cout << "1.Nombre  2.Tipo\nOpcion: ";
+    int op; cin >> op;
+    if (op == 1) {
+        cout << "Nuevo nombre: "; cin >> m->nombreMazo;
+        cout << "Nombre del mazo actualizado." << endl;
+    } else if (op == 2) {
+        cout << "Nuevo tipo: "; cin >> m->tipoMazo;
+        cout << "Tipo del mazo actualizado." << endl;
+    } else {
+        cout << "Opcion invalida." << endl;
+    }
+}
+
 void insertarClan() {
     int id, cant, pts;
     string nom, reg;
@@ -1190,6 +1351,34 @@ void eliminarClanMenu() {
     else cout << "Clan no encontrado." << endl;
 }
 
+//modificarClan: permite actualizar nombre, region, miembros o puntaje de un clan por su ID
+void modificarClan() {
+    if (listaVaciaClan()) { cout << "No hay clanes." << endl; return; }
+    int id;
+    cout << "ID del clan a modificar: "; cin >> id;
+    Clanes* c = buscarClanPorId(id);
+    if (c == nullptr) { cout << "Clan no encontrado." << endl; return; }
+    cout << "1.Nombre  2.Region  3.Miembros  4.Puntaje\nOpcion: ";
+    int op; cin >> op;
+    if (op == 1) {
+        cout << "Nuevo nombre: "; cin >> c->nombreClan;
+        cout << "Nombre del clan actualizado." << endl;
+    } else if (op == 2) {
+        cout << "Nueva region: "; cin >> c->region;
+        cout << "Region actualizada." << endl;
+    } else if (op == 3) {
+        int v; cout << "Nuevos miembros: "; cin >> v;
+        if (v < 0) cout << "Valor invalido." << endl;
+        else { c->cantidadMiembros = v; cout << "Miembros actualizados." << endl; }
+    } else if (op == 4) {
+        int v; cout << "Nuevo puntaje: "; cin >> v;
+        if (v < 0) cout << "Valor invalido." << endl;
+        else { c->puntajeClan = v; cout << "Puntaje actualizado." << endl; }
+    } else {
+        cout << "Opcion invalida." << endl;
+    }
+}
+
 void insertarBatalla() {
     int j1, j2;
     cout << "ID Jugador 1: "; cin >> j1;
@@ -1202,6 +1391,42 @@ void eliminarBatallaMenu() {
     cout << "ID batalla a eliminar: "; cin >> id;
     if (eliminarBatalla(id)) cout << "Batalla eliminada." << endl;
     else cout << "Batalla no encontrada." << endl;
+}
+
+//modificarBatallaMenu: permite editar los campos de una batalla existente por su ID
+void modificarBatallaMenu() {
+    if (primeraBatalla == nullptr) { cout << "No hay batallas." << endl; return; }
+    int id;
+    cout << "ID de la batalla a modificar: "; cin >> id;
+    Batallas* b = buscarBatallaPorID(id);
+    if (b == nullptr) { cout << "Batalla no encontrada." << endl; return; }
+    cout << "1.Ganador  2.Coronas J1  3.Coronas J2  4.Duracion  5.Arena  6.Fecha\nOpcion: ";
+    int op; cin >> op;
+    if (op == 1) {
+        int g; cout << "Nuevo ganador (ID jugador): "; cin >> g;
+        if (!existeJugador(g)) cout << "Jugador no existe." << endl;
+        else { b->ganador = g; cout << "Ganador actualizado." << endl; }
+    } else if (op == 2) {
+        int v; cout << "Nuevas coronas J1 (0-3): "; cin >> v;
+        if (v < 0 || v > 3) cout << "Valor invalido." << endl;
+        else { b->coronasJ1 = v; cout << "Coronas J1 actualizadas." << endl; }
+    } else if (op == 3) {
+        int v; cout << "Nuevas coronas J2 (0-3): "; cin >> v;
+        if (v < 0 || v > 3) cout << "Valor invalido." << endl;
+        else { b->coronasJ2 = v; cout << "Coronas J2 actualizadas." << endl; }
+    } else if (op == 4) {
+        float d; cout << "Nueva duracion: "; cin >> d;
+        if (d <= 0) cout << "Duracion invalida." << endl;
+        else { b->duracion = d; cout << "Duracion actualizada." << endl; }
+    } else if (op == 5) {
+        int a; cout << "Nuevo ID arena: "; cin >> a;
+        b->IDArena = a; cout << "Arena actualizada." << endl;
+    } else if (op == 6) {
+        string f; cout << "Nueva fecha: "; cin >> f;
+        b->fecha = f; cout << "Fecha actualizada." << endl;
+    } else {
+        cout << "Opcion invalida." << endl;
+    }
 }
 
 // 
@@ -1475,7 +1700,57 @@ void consultas() {
 }
 
 
-// REPORTES
+//REPORTES
+// Imprimen vistas detalladas y cruzadas de los datos del sistema.
+
+
+void reporte1TodasListas() {
+    imprimirCartas();
+    imprimirJugadores();
+    imprimirMazos();
+    imprimirClanes();
+    imprimirArenas();
+    imprimirBatallas();
+}
+/*
+ * Reporte 2: para cada jugador muestra su arena, clan y mazos. vCruza información entre listas usando los IDs de referencia.
+ */
+void reporte2DetalladoJugadores() {
+    if (!primerJugador) { cout << "No hay jugadores." << endl; return; }
+    cout << "\n===== REPORTE DETALLADO DE JUGADORES =====" << endl;
+    Jugadores* auxJ = primerJugador;
+    while (auxJ != nullptr) {
+        cout << "\n[" << auxJ->idJugador << "] " << auxJ->nombreUsuario
+             << " | Nivel: " << auxJ->nivelRey << " | Trofeos: " << auxJ->trofeos << endl;
+//buscar arena
+        Arena* auxA = listaArenas;
+        while (auxA != nullptr) {
+            if (auxA->IdArena == auxJ->idArena) { cout << "  Arena: " << auxA->nombreArena << endl; break; }
+            auxA = auxA->sig;
+        }
+        //buscar clan
+        if (!listaVaciaClan()) {
+            Clanes* auxC = inicioClan;
+            do {
+                if (auxC->idClan == auxJ->idClan) { cout << "  Clan: " << auxC->nombreClan << endl; break; }
+                auxC = auxC->sig;
+            } while (auxC != inicioClan);
+        }
+        //listar mazos del jugador
+        cout << "  Mazos:" << endl;
+        Mazo* auxM = listaGlobalMazos;
+        bool hayMazo = false;
+        while (auxM != nullptr) {
+            if (auxM->idJugador == auxJ->idJugador) {
+                cout << "    -> " << auxM->nombreMazo << " (" << contarCartasEnMazo(auxM) << " cartas)" << endl;
+                hayMazo = true;
+            }
+            auxM = auxM->siguiente;
+        }
+        if (!hayMazo) cout << "    (sin mazos)" << endl;
+        auxJ = auxJ->sig;
+    }
+}
 
 //reporte 3: cada mazo con sus 8 cartas
 void reporte3MazosConCartas() {
@@ -1497,6 +1772,27 @@ void reporte3MazosConCartas() {
     }
 }
 
+void reporte4ClanesMiembros() {
+    if (listaVaciaClan()) { cout << "No hay clanes." << endl; return; }
+    cout << "\n===== CLANES Y SUS MIEMBROS =====" << endl;
+    Clanes* auxC = inicioClan;
+    do {
+        cout << "\nClan [" << auxC->idClan << "] " << auxC->nombreClan
+             << " | Region: " << auxC->region << endl;
+//mostrar miembros por idClan en la lista global de jugadores
+        Jugadores* auxJ = primerJugador;
+        bool hay = false;
+        while (auxJ != nullptr) {
+            if (auxJ->idClan == auxC->idClan) {
+                cout << "  -> " << auxJ->nombreUsuario << " (ID: " << auxJ->idJugador << ")" << endl;
+                hay = true;
+            }
+            auxJ = auxJ->sig;
+        }
+        if (!hay) cout << "  (sin jugadores)" << endl;
+        auxC = auxC->sig;
+    } while (auxC != inicioClan);
+}
 
 void reporte5ArenaJugadores() {
     if (listaArenas == nullptr) { cout << "No hay arenas." << endl; return; }
@@ -1519,10 +1815,14 @@ void reporte5ArenaJugadores() {
     }
 }
 
+//reporte 6: batallas con jugadores, mazos, coronas y ganador
+void reporte6Batallas() {
+    imprimirBatallas();
+}
 
-/*
+   /*
 Reporte 7: ordena las cartas por costo de elixir usando burbuja. intercambia los datos dentro de los nodos (no los punteros).
- */
+*/
 void reporte7CartasPorElixir() {
     if (listaCartas == nullptr) { cout << "No hay cartas." << endl; return; }
     int n = 0;
@@ -1553,153 +1853,68 @@ void reporte7CartasPorElixir() {
     }
 }
 
-//Funciones reportes
-void imprimirTodo() {
-    imprimirCartas();
-    imprimirJugadores();
-    imprimirMazos();
-    imprimirClanes();
-    imprimirArenas();
-    imprimirBatallas();
-
-}
-void reporteJugador(){}
-
-void reporteMazos(){}
-
-void reporteClanes() {
-    if (listaVaciaClan()) {
-        cout << "No hay clanes" << endl;
-        return;
-    }
-
-    Clanes* clan = inicioClan;
-
-    do {
-        imprimirClan(clan);
-        imprimirJugadores(clan->subListaJugadores);
-    } while (clan != inicioClan);
-}
-
-void reporteArenas(){}
-
-void reporteBatallas() {
-    if (primeraBatalla == nullptr) {
-        cout << "No hay batallas registradas" << endl;
-        return;
-    }
-
-    Batallas *temp = primeraBatalla;
-    imprimirBatallas();
-    cout<<"PRIMER JUGADOR"<<endl;
-    imprimirJugador(temp->IDJugador1);
-    cout<<"SEGUNDO JUGADOR"<<endl;
-    imprimirJugador(temp->IDJugador2);
-    imprimirCartas();
-
-
-}
-
-void reporteCartas(){}
-
-void reporteJugadoresNombre() {
-    imprimirJugadores();
-}
-
-void reporteBatallasGanadas() {
-    Jugadores *temp = primerJugador;
-    if (!primerJugador) {
-        cout << "No hay jugadores"<<endl;
-        return;
-    }
-    cout<<"----- BATALLAS GANADAS POR JUGADOR -----"<<endl;
-    while (temp->sig)
+void reporte8JugadoresAlfabetico() {
+    cout << "\n===== JUGADORES EN ORDEN ALFABETICO =====" << endl;
+    if (!primerJugador) { cout << "No hay jugadores." << endl; return; }
+    Jugadores* temp = primerJugador;
+    while (temp != nullptr) {
+        cout << temp->nombreUsuario << " (ID: " << temp->idJugador
+             << ", Trofeos: " << temp->trofeos << ")" << endl;
         temp = temp->sig;
-    while (temp) {
-        Batallas *ganadas = buscarJugadorID(temp->idJugador);
-        cout<<"JUGADOR "<<temp->idJugador<<endl;
-        imprimirBatalla(ganadas);
-
-        temp = temp->ant;
     }
 }
 
-///Reportes
-int menuReportes() {
-    cout << "-------------- REPORTES --------------" << endl;
-    cout << "   Elija una opcion" << endl;
-    cout << "1. Imprimir todas las listas principales" << endl;
-    cout << "2. Reporte detallado de cada jugador (con arena, clan y mazos)" << endl;
-    cout << "3. Lista de mazos con sus 8 cartas" << endl;
-    cout << "4. Reporte de clanes con sus miembros" << endl;
-    cout << "5. Reporte de arenas con los jugadores que pertenecen a cada una" << endl;
-    cout << "6. Reporte de batallas (jugadores, mazos, coronas, ganador)" << endl;
-    cout << "7. Reporte de cartas ordenadas por costo de elixir" << endl;
-    cout << "8. Reporte de jugadores ordenados alfabeticamente" << endl;
-    cout << "9. Reporte de batallas ganadas por cada jugador" << endl;
-    cout << "0. Salir" << endl;
-    int opcion;
-    cin >> opcion;
-    return opcion;
+void reporte9BatallasPorJugador() {
+    if (!primerJugador) { cout << "No hay jugadores." << endl; return; }
+    if (primeraBatalla == nullptr) { cout << "No hay batallas." << endl; return; }
+    cout << "\n===== BATALLAS GANADAS POR JUGADOR =====" << endl;
+    Jugadores* auxJ = primerJugador;
+    while (auxJ != nullptr) {
+        int ganadas = 0;
+        Batallas* auxB = primeraBatalla;
+        do {
+            if ((auxB->ganador == auxJ->idJugador)) ganadas++;
+            auxB = auxB->sig;
+        } while (auxB != primeraBatalla);
+        cout << auxJ->nombreUsuario << ": " << ganadas << " victorias" << endl;
+        auxJ = auxJ->sig;
+    }
 }
 
-void reportes() {
-    int opcion;
-    do {
-        opcion = menuReportes();
-
-        if (opcion == 1) {
-            cout << "Reporte 1: imprimir todas las listas principales" << endl;
-
-        }
-        else if (opcion == 2) {
-            cout << "Reporte 2: detalle de cada jugador (arena, clan, mazos)" << endl;
-
-        }
-        else if (opcion == 3) {
-            cout << "Reporte 3: lista de mazos con sus 8 cartas" << endl;
-
-        }
-        else if (opcion == 4) {
-            cout << "Reporte 4: clanes con sus miembros" << endl;
-
-        }
-        else if (opcion == 5) {
-            cout << "Reporte 5: arenas con sus jugadores" << endl;
-
-        }
-        else if (opcion == 6) {
-            cout << "Reporte 6: batallas (jugadores, mazos, coronas, ganador)" << endl;
-
-        }
-        else if (opcion == 7) {
-            cout << "Reporte 7: cartas ordenadas por costo de elixir" << endl;
-
-        }
-        else if (opcion == 8) {
-            cout << "Reporte 8: jugadores ordenados alfabeticamente" << endl;
-
-        }
-        else if (opcion == 9) {
-            cout << "Reporte 9: batallas ganadas por cada jugador" << endl;
-        }
-        else if (opcion == 0) {
-            cout << "FIN DE REPORTES" << endl;
-        }
-        else {
-            cout << "Opción no válida" << endl;
-        }
-
-    } while (opcion != 0);
+void menuReportes() {
+    int opcion = -1;
+    while (opcion != 0) {
+        cout << "\n----- REPORTES -----" << endl;
+        cout << "1. Todas las listas principales" << endl;
+        cout << "2. Detalle de jugadores (arena, clan, mazos)" << endl;
+        cout << "3. Mazos con sus 8 cartas" << endl;
+        cout << "4. Clanes con sus miembros" << endl;
+        cout << "5. Arenas con sus jugadores" << endl;
+        cout << "6. Batallas (jugadores, mazos, coronas, ganador)" << endl;
+        cout << "7. Cartas ordenadas por costo de elixir" << endl;
+        cout << "8. Jugadores en orden alfabetico" << endl;
+        cout << "9. Batallas ganadas por cada jugador" << endl;
+        cout << "0. Salida" << endl;
+        cout << "Opcion: ";
+        cin >> opcion;
+        if      (opcion == 1) reporte1TodasListas();
+        else if (opcion == 2) reporte2DetalladoJugadores();
+        else if (opcion == 3) reporte3MazosConCartas();
+        else if (opcion == 4) reporte4ClanesMiembros();
+        else if (opcion == 5) reporte5ArenaJugadores();
+        else if (opcion == 6) reporte6Batallas();
+        else if (opcion == 7) reporte7CartasPorElixir();
+        else if (opcion == 8) reporte8JugadoresAlfabetico();
+        else if (opcion == 9) reporte9BatallasPorJugador();
+        else if (opcion != 0) cout << "Opcion invalida." << endl;
+    }
 }
 
-
-
-// CARGA AUTOMATICA
+//CARGA AUTOMATICA
 //10+ registros por entidad para probar el sistema desde el inicio.
 
 void cargaAutomatica() {
-    // Arenas
+    //Arenas
     insertarArenaInicio(1,  "Campamento",          0,    299);
     insertarArenaInicio(2,  "Isla Goblin",          300,  599);
     insertarArenaInicio(3,  "Valle Boneyard",       600,  999);
@@ -1725,7 +1940,7 @@ void cargaAutomatica() {
     insercioninicio(11, "Barbaro",        "Comun",      "Tropa",    5, 150, 1200);
     insercioninicio(12, "Arqueras",       "Comun",      "Tropa",    3, 119, 252);
 
-    // Clanes
+    //Clanes (se insertan antes que los jugadores para que la sublista funcione)
     insertarClanAlFinal(1,  "LosPro",       "CR", 15, 5000);
     insertarClanAlFinal(2,  "EliteForce",   "MX", 20, 8000);
     insertarClanAlFinal(3,  "DragonTeam",   "ES", 10, 3000);
@@ -1738,6 +1953,7 @@ void cargaAutomatica() {
     insertarClanAlFinal(10, "NightWolves",  "VE", 5,  1500);
 
     //jugadores (ordenados por nombre automáticamente)
+    //al insertar cada jugador tambien se agrega a la sublista de su clan
     insertarJugadorOrdenadoPorNombre(1,  "Alex",     10, 250,  1, 1);
     insertarJugadorOrdenadoPorNombre(2,  "Bruno",    8,  550,  2, 2);
     insertarJugadorOrdenadoPorNombre(3,  "Carlos",   11, 750,  3, 3);
@@ -1750,7 +1966,7 @@ void cargaAutomatica() {
     insertarJugadorOrdenadoPorNombre(10, "Jorge",    14, 3100, 10, 10);
 
     // Mazos con 8 cartas cada uno
-    insertarMazoFinal(1, "MazoAlpha",   "Ataque",  1);
+insertarMazoFinal(1, "MazoAlpha",   "Ataque",  1);
     Mazo* m = listaGlobalMazos;
     agregarCartaASublista(m,1); agregarCartaASublista(m,2); agregarCartaASublista(m,3); agregarCartaASublista(m,4);
     agregarCartaASublista(m,5); agregarCartaASublista(m,6); agregarCartaASublista(m,7); agregarCartaASublista(m,8);
@@ -1816,7 +2032,7 @@ void cargaAutomatica() {
     cout << "\nCarga automatica completada :)" << endl;
 }
 
-// MENÚS Todos usan while(opcion != 0) para no recurrir en llamadas.
+//MENuS Todos usan while(opcion != 0) para no recurrir en llamadas.
 //Su estilo original se conserva donde corresponde.
 //____________________________----
 void menuCartas() {
@@ -1826,7 +2042,7 @@ void menuCartas() {
         cin >> opcion;
         if      (opcion == 1) insertarCarta();
         else if (opcion == 2) imprimirCartas();
-        else if (opcion == 3) modificarDatos();
+        else if (opcion == 3) modificarCartaDatos(); //ahora llama a la funcion correcta para cartas
         else if (opcion == 4) eliminarCarta();
         else if (opcion != 0) cout << "Opcion invalida." << endl;
     }
@@ -1842,9 +2058,9 @@ void menuJugadores() {
         cout << "4.Eliminar" << endl;
         cout << "0.Salida" << endl;
         cin >> opcion;
-        if      (opcion == 1) insertarJugador();
+    if      (opcion == 1) insertarJugador();
         else if (opcion == 2) imprimirJugadores();
-        else if (opcion == 3) modificarDatos();
+        else if (opcion == 3) modificarDatos(); //esta si es para jugadores
         else if (opcion == 4) eliminarJugadorMenu();
         else if (opcion != 0) cout << "Opcion invalida." << endl;
     }
@@ -1860,9 +2076,9 @@ void menuMazos() {
         cout << "4.Eliminar" << endl;
         cout << "0.Salida" << endl;
         cin >> opcion;
-        if      (opcion == 1) insertarMazo();
+    if      (opcion == 1) insertarMazo();
         else if (opcion == 2) imprimirMazos();
-        else if (opcion == 3) modificarDatos();
+        else if (opcion == 3) modificarMazo(); //ahora llama a la funcion correcta para mazos
         else if (opcion == 4) eliminarMazo();
         else if (opcion != 0) cout << "Opcion invalida." << endl;
     }
@@ -1880,7 +2096,7 @@ void menuBatallas() {
         cin >> opcion;
         if      (opcion == 1) insertarBatalla();
         else if (opcion == 2) imprimirBatallas();
-        else if (opcion == 3) modificarDatos();
+        else if (opcion == 3) modificarBatallaMenu(); //ahora llama a la funcion correcta para batallas
         else if (opcion == 4) eliminarBatallaMenu();
         else if (opcion != 0) cout << "Opcion invalida." << endl;
     }
@@ -1898,7 +2114,7 @@ void menuClanes() {
         cin >> opcion;
         if      (opcion == 1) insertarClan();
         else if (opcion == 2) imprimirClanes();
-        else if (opcion == 3) modificarDatos();
+        else if (opcion == 3) modificarClan(); //ahora llama a la funcion correcta para clanes
         else if (opcion == 4) eliminarClanMenu();
         else if (opcion != 0) cout << "Opcion invalida." << endl;
     }
